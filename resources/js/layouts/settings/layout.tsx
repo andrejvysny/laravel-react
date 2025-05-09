@@ -22,6 +22,26 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/appearance',
         icon: null,
     },
+    {
+        title: 'Security',
+        href: '/settings/security',
+        icon: null,
+    },
+    {
+        title: 'API Tokens',
+        href: '/settings/api-tokens',
+        icon: null,
+    },
+    {
+        title: 'Two Factor Authentication',
+        href: '/settings/two-factor-authentication',
+        icon: null,
+    },
+    {
+        title: 'Delete Account',
+        href: '/settings/delete-account',
+        icon: null,
+    },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

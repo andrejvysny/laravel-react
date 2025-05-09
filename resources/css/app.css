@@ -157,3 +157,18 @@
         @apply bg-background text-foreground;
     }
 }
+
+
+
+.bg-gray-900 {
+    background-color: #171717;
+}
+
+.bg-gray-800 {
+    background-color: #333333;
+}
+
+.bg-gray-700 {
+    background-color: #404040;
+}
+
