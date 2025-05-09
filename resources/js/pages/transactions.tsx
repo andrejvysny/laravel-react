@@ -57,7 +57,7 @@ export default function Transactions({ transactions, monthlySummaries }: Props) 
         
         <div className="flex h-full flex-1 flex-col rounded-xl text-white">
             <div className="sticky top-0 bg-gray-900 z-10 p-4">
-                <div className="mb-6 max-w-xl mx-auto w-full">
+                <div className="mb-6 mx-auto w-full">
                     <div className="flex justify-between items-center mb-4">
                         <input
                             type="text"

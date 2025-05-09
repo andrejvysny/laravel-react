@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'gocardless_secret_id',
+        'gocardless_secret_key',
+        'gocardless_access_token',
+        'gocardless_refresh_token',
+        'gocardless_token_expires_at',
     ];
 
     /**
@@ -31,6 +36,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'gocardless_secret_id',
+        'gocardless_secret_key',
+        'gocardless_access_token',
+        'gocardless_refresh_token',
     ];
 
     /**
@@ -43,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'gocardless_token_expires_at' => 'datetime',
         ];
     }
 }

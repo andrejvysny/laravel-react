@@ -21,14 +21,14 @@ class AccountController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'account_id' => 'required|string|max:255|unique:accounts',
+            'account_id' => 'required|string|max:255', 
             'bank_name' => 'required|string|max:255',
-            'iban' => 'required|string|max:34|unique:accounts',
+            'iban' => 'required|string|max:255',
             'currency' => 'required|string|max:3',
             'balance' => 'required|numeric',
         ]);
 
-        $account = Account::create($validated);
+            $account = Account::create($validated);
 
         return redirect()->back();
     }
@@ -56,4 +56,5 @@ class AccountController extends Controller
             'monthlySummaries' => $monthlySummaries,
         ]);
     }
+
 }

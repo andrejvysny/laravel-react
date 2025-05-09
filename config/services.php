@@ -27,7 +27,11 @@ return [
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
-
+    'gocardless' => [
+        'access_token' => env('GOCARDLESS_ACCESS_TOKEN'),
+        'secret_id' => env('GOCARDLESS_SECRET_ID'),
+        'secret_key' => env('GOCARDLESS_SECRET_KEY'),
+    ],
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

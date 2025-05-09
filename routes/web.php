@@ -5,6 +5,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionRuleController;
+use App\Http\Controllers\GoCardlessController;
 
 Route::get('/', function () {
 
@@ -24,6 +26,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
 
     Route::get('/accounts/{id}', [AccountController::class, 'show'])->name('accounts.show');
+
+    // Transaction Rules
+    Route::get('/transaction-rules', [TransactionRuleController::class, 'index'])->name('transaction-rules.index');
+    Route::post('/transaction-rules', [TransactionRuleController::class, 'store'])->name('transaction-rules.store');
+    Route::put('/transaction-rules/{rule}', [TransactionRuleController::class, 'update'])->name('transaction-rules.update');
+    Route::delete('/transaction-rules/{rule}', [TransactionRuleController::class, 'destroy'])->name('transaction-rules.destroy');
+    Route::post('/transaction-rules/reorder', [TransactionRuleController::class, 'reorder'])->name('transaction-rules.reorder');
+});
+
+// GoCardless routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/gocardless/institutions', [GoCardlessController::class, 'getInstitutions']);
+    Route::post('/api/gocardless/import', [GoCardlessController::class, 'importAccount']);
+    Route::get('/api/gocardless/callback', [GoCardlessController::class, 'handleCallback'])->name('gocardless.callback');
 });
 
 require __DIR__.'/settings.php';

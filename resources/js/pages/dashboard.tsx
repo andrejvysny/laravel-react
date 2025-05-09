@@ -9,8 +9,10 @@ import {
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ChartOptions
 } from 'chart.js';
+import { Account, Transaction } from '@/types';
 
 ChartJS.register(
     CategoryScale,
@@ -26,37 +28,60 @@ const breadcrumbs = [
     { title: 'Dashboard', href: '/dashboard' },
 ];
 
-export default function Dashboard({ accounts, recentTransactions }) {
+interface DashboardProps {
+    accounts: Account[];
+    recentTransactions: Transaction[];
+    monthlyBalances: Record<number, Record<string, number>>;
+}
+
+export default function Dashboard({ accounts, recentTransactions, monthlyBalances }: DashboardProps) {
     const totalBalance = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+
+    // Get all months from the first account's data
+    const months = Object.keys(monthlyBalances[accounts[0]?.id] || {});
 
     // Prepare data for balance chart
     const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [{
-            label: 'Balance',
-            data: [totalBalance * 0.8, totalBalance * 0.85, totalBalance * 0.9, totalBalance * 0.95, totalBalance],
-            borderColor: 'rgb(34, 197, 94)',
+        labels: months,
+        datasets: accounts.map(account => ({
+            label: account.name,
+            data: months.map(month => monthlyBalances[account.id][month] || 0),
+            borderColor: `hsl(${Math.random() * 360}, 70%, 50%)`,
             backgroundColor: 'rgba(34, 197, 94, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
+            tension: 0,
+            fill: false
+        }))
     };
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false
+                display: true,
+                position: 'top',
+                labels: {
+                    color: '#9CA3AF',
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
             }
         },
         scales: {
             y: {
+                type: 'linear',
                 grid: {
                     color: 'rgba(75, 85, 99, 0.2)'
                 },
                 ticks: {
-                    color: '#9CA3AF'
+                    color: '#9CA3AF',
+                    callback: function(value) {
+                        return `${Number(value).toFixed(2)} €`;
+                    }
                 }
             },
             x: {
@@ -67,6 +92,11 @@ export default function Dashboard({ accounts, recentTransactions }) {
                     color: '#9CA3AF'
                 }
             }
+        },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
         }
     };
 

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import CreateAccountModal from '@/components/CreateAccountModal';
 import { Account } from '@/types';
-import { router, Link } from '@inertiajs/react';
+import { router, Link, Head } from '@inertiajs/react';
+import GoCardlessImportWizard from '@/components/GoCardlessImportWizard';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface Props {
     accounts: Account[];
@@ -10,6 +12,7 @@ interface Props {
 
 export default function Accounts({ accounts }: Props) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
     const handleCreateAccount = (data: any) => {
         router.post('/accounts', data, {
@@ -25,6 +28,7 @@ export default function Accounts({ accounts }: Props) {
                 { title: 'Accounts', href: '/accounts' },
             ]}
         >
+            <Head title="Accounts" />
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center mb-6">
@@ -35,6 +39,13 @@ export default function Accounts({ accounts }: Props) {
                         >
                             + New Account
                         </button>
+                        <button
+                            onClick={() => setIsImportWizardOpen(true)}
+                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            <PlusIcon className="h-5 w-5 mr-2" />
+                            Import Account
+                        </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -42,7 +53,7 @@ export default function Accounts({ accounts }: Props) {
                             <Link
                                 key={account.id}
                                 href={`/accounts/${account.id}`}
-                                className="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition-colors cursor-pointer block"
+                                className="bg-gray-900 rounded-lg p-6 hover:bg-gray-700 transition-colors cursor-pointer block"
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
@@ -76,6 +87,15 @@ export default function Accounts({ accounts }: Props) {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={handleCreateAccount}
+            />
+
+            <GoCardlessImportWizard
+                isOpen={isImportWizardOpen}
+                onClose={() => setIsImportWizardOpen(false)}
+                onSuccess={() => {
+                    setIsImportWizardOpen(false);
+                    window.location.reload();
+                }}
             />
         </AppLayout>
     );
