@@ -59,7 +59,7 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                 created_at: '',
                 updated_at: '',
             },
-        } as TransactionType);
+        } as Transaction);
     });
 
     return (

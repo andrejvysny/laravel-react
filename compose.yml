@@ -4,7 +4,6 @@ services:
     volumes:
       - .:/var/www
 
-
   laravel:
         image: php:8.3-fpm
         volumes:

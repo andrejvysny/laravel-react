@@ -6,6 +6,17 @@
 
 Spendly is an open-source personal finance tracker that helps you manage your finances, analyze spending patterns, and maintain budgets. It integrates with GoCardless for seamless bank account imports and provides powerful financial analysis tools.
 
+## 📸 Screenshots
+
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+    <img src="docs/images/dashboard.png" alt="Dashboard" style="width: 100%; border-radius: 8px;">
+    <img src="docs/images/transactions.png" alt="Transactions" style="width: 100%; border-radius: 8px;">
+    <img src="docs/images/accounts.png" alt="Budgets" style="width: 100%; border-radius: 8px;">
+    <img src="docs/images/account-detail.png" alt="Reports" style="width: 100%; border-radius: 8px;">
+</div>
+
+
+
 ## 🌟 Features
 
 - **Bank Account Integration**: Import transactions automatically using GoCardless
