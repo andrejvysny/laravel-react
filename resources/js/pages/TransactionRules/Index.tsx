@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
 import { TransactionRule } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
-const breadcrumbs = [
-    { title: 'Transaction Rules', href: '/transaction-rules' },
-];
+const breadcrumbs = [{ title: 'Transaction Rules', href: '/transaction-rules' }];
 
 const conditionTypes = [
     { value: 'amount', label: 'Amount' },
@@ -85,37 +83,37 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Transaction Rules" />
 
-            <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                 {/* Create/Edit Form */}
-                <div className="bg-gray-900 rounded-xl p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">
-                        {editingRule ? 'Edit Rule' : 'Create New Rule'}
-                    </h2>
+                <div className="mb-6 rounded-xl bg-gray-900 p-6">
+                    <h2 className="mb-4 text-lg font-semibold">{editingRule ? 'Edit Rule' : 'Create New Rule'}</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-400">Name</label>
                             <input
                                 type="text"
                                 value={data.name}
-                                onChange={e => setData('name', e.target.value)}
-                                className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                onChange={(e) => setData('name', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                             />
-                            {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
+                            {errors.name && <div className="mt-1 text-sm text-red-500">{errors.name}</div>}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div>
                                 <label className="block text-sm font-medium text-gray-400">Condition Type</label>
                                 <select
                                     value={data.condition_type}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         setData('condition_type', e.target.value);
                                         setData('condition_operator', conditionOperators[e.target.value as keyof typeof conditionOperators][0].value);
                                     }}
-                                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                    className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                                 >
-                                    {conditionTypes.map(type => (
-                                        <option key={type.value} value={type.value}>{type.label}</option>
+                                    {conditionTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -124,11 +122,13 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                                 <label className="block text-sm font-medium text-gray-400">Operator</label>
                                 <select
                                     value={data.condition_operator}
-                                    onChange={e => setData('condition_operator', e.target.value)}
-                                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                    onChange={(e) => setData('condition_operator', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                                 >
-                                    {conditionOperators[data.condition_type as keyof typeof conditionOperators].map(op => (
-                                        <option key={op.value} value={op.value}>{op.label}</option>
+                                    {conditionOperators[data.condition_type as keyof typeof conditionOperators].map((op) => (
+                                        <option key={op.value} value={op.value}>
+                                            {op.label}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -138,22 +138,24 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                                 <input
                                     type="text"
                                     value={data.condition_value}
-                                    onChange={e => setData('condition_value', e.target.value)}
-                                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                    onChange={(e) => setData('condition_value', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                                 />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <label className="block text-sm font-medium text-gray-400">Action Type</label>
                                 <select
                                     value={data.action_type}
-                                    onChange={e => setData('action_type', e.target.value)}
-                                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                    onChange={(e) => setData('action_type', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                                 >
-                                    {actionTypes.map(type => (
-                                        <option key={type.value} value={type.value}>{type.label}</option>
+                                    {actionTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -163,8 +165,8 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                                 <input
                                     type="text"
                                     value={data.action_value}
-                                    onChange={e => setData('action_value', e.target.value)}
-                                    className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+                                    onChange={(e) => setData('action_value', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white"
                                 />
                             </div>
                         </div>
@@ -173,26 +175,22 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                             <input
                                 type="checkbox"
                                 checked={data.is_active}
-                                onChange={e => setData('is_active', e.target.checked)}
-                                className="rounded bg-gray-800 border-gray-700 text-green-500"
+                                onChange={(e) => setData('is_active', e.target.checked)}
+                                className="rounded border-gray-700 bg-gray-800 text-green-500"
                             />
                             <label className="ml-2 text-sm text-gray-400">Active</label>
                         </div>
 
                         <div className="flex justify-end space-x-4">
                             {editingRule && (
-                                <button
-                                    type="button"
-                                    onClick={cancelEdit}
-                                    className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
-                                >
+                                <button type="button" onClick={cancelEdit} className="rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-600">
                                     Cancel
                                 </button>
                             )}
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-50"
+                                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-500 disabled:opacity-50"
                             >
                                 {editingRule ? 'Update Rule' : 'Create Rule'}
                             </button>
@@ -201,12 +199,12 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                 </div>
 
                 {/* Rules List */}
-                <div className="bg-gray-900 rounded-xl p-6">
-                    <h2 className="text-lg font-semibold mb-4">Your Rules</h2>
+                <div className="rounded-xl bg-gray-900 p-6">
+                    <h2 className="mb-4 text-lg font-semibold">Your Rules</h2>
                     <div className="space-y-4">
-                        {rules.map(rule => (
-                            <div key={rule.id} className="bg-gray-800 rounded-lg p-4">
-                                <div className="flex justify-between items-start">
+                        {rules.map((rule) => (
+                            <div key={rule.id} className="rounded-lg bg-gray-800 p-4">
+                                <div className="flex items-start justify-between">
                                     <div>
                                         <h3 className="text-lg font-medium">{rule.name}</h3>
                                         <p className="text-sm text-gray-400">
@@ -219,7 +217,7 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                                     <div className="flex space-x-2">
                                         <button
                                             onClick={() => startEdit(rule)}
-                                            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-500"
+                                            className="rounded-md bg-blue-600 px-3 py-1 text-white hover:bg-blue-500"
                                         >
                                             Edit
                                         </button>
@@ -229,14 +227,16 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
                                                     // Add delete functionality
                                                 }
                                             }}
-                                            className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
+                                            className="rounded-md bg-red-600 px-3 py-1 text-white hover:bg-red-500"
                                         >
                                             Delete
                                         </button>
                                     </div>
                                 </div>
                                 <div className="mt-2">
-                                    <span className={`px-2 py-1 text-xs rounded-full ${rule.is_active ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-300'}`}>
+                                    <span
+                                        className={`rounded-full px-2 py-1 text-xs ${rule.is_active ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-300'}`}
+                                    >
                                         {rule.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
@@ -247,4 +247,4 @@ export default function Index({ rules }: { rules: TransactionRule[] }) {
             </div>
         </AppLayout>
     );
-} 
+}

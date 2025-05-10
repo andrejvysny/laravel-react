@@ -45,22 +45,26 @@ class Transaction extends Model
      * Transaction type constants
      */
     public const TYPE_TRANSFER = 'TRANSFER';
+
     public const TYPE_CARD_PAYMENT = 'CARD_PAYMENT';
+
     public const TYPE_EXCHANGE = 'EXCHANGE';
+
     public const TYPE_WITHDRAWAL = 'WITHDRAWAL';
+
     public const TYPE_DEPOSIT = 'DEPOSIT';
 
     /**
      * Currency constants
      */
     public const CURRENCY_EUR = 'EUR';
+
     public const CURRENCY_USD = 'USD';
+
     public const CURRENCY_GBP = 'GBP';
 
     /**
      * Get the account that owns the transaction.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function account(): BelongsTo
     {

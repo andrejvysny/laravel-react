@@ -24,7 +24,7 @@ class TransactionRuleSeeder extends Seeder
                     'action_type' => 'set_type',
                     'action_value' => 'DEPOSIT',
                     'is_active' => true,
-                    'order' => 1
+                    'order' => 1,
                 ],
                 [
                     'name' => 'Groceries Rule',
@@ -35,7 +35,7 @@ class TransactionRuleSeeder extends Seeder
                     'action_type' => 'set_type',
                     'action_value' => 'CARD_PAYMENT',
                     'is_active' => true,
-                    'order' => 2
+                    'order' => 2,
                 ],
                 [
                     'name' => 'Large Transfer Rule',
@@ -46,7 +46,7 @@ class TransactionRuleSeeder extends Seeder
                     'action_type' => 'set_type',
                     'action_value' => 'TRANSFER',
                     'is_active' => true,
-                    'order' => 3
+                    'order' => 3,
                 ],
                 [
                     'name' => 'ATM Withdrawal Rule',
@@ -57,8 +57,8 @@ class TransactionRuleSeeder extends Seeder
                     'action_type' => 'set_type',
                     'action_value' => 'WITHDRAWAL',
                     'is_active' => true,
-                    'order' => 4
-                ]
+                    'order' => 4,
+                ],
             ];
 
             foreach ($rules as $rule) {
@@ -72,9 +72,9 @@ class TransactionRuleSeeder extends Seeder
                     'action_type' => $rule['action_type'],
                     'action_value' => $rule['action_value'],
                     'is_active' => $rule['is_active'],
-                    'order' => $rule['order']
+                    'order' => $rule['order'],
                 ]);
             }
         }
     }
-} 
+}

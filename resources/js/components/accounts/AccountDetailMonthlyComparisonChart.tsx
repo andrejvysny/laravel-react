@@ -1,26 +1,7 @@
-import React from 'react';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ChartOptions
-} from 'chart.js';
+import { CategoryScale, Chart as ChartJS, ChartOptions, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface MonthlyData {
     date: string;
@@ -43,75 +24,77 @@ function AccountDetailMonthlyComparisonChart({ currentMonthData, previousMonthDa
                 labels: {
                     color: '#9CA3AF',
                     usePointStyle: true,
-                    pointStyle: 'circle'
-                }
+                    pointStyle: 'circle',
+                },
             },
             tooltip: {
                 mode: 'index',
                 intersect: false,
-            }
+            },
         },
         scales: {
             y: {
                 type: 'linear',
                 grid: {
-                    color: 'rgba(75, 85, 99, 0.2)'
+                    color: 'rgba(75, 85, 99, 0.2)',
                 },
                 ticks: {
                     color: '#9CA3AF',
-                    callback: function(value) {
+                    callback: function (value) {
                         return `${Number(value).toFixed(2)} €`;
-                    }
-                }
+                    },
+                },
             },
             x: {
                 grid: {
-                    color: 'rgba(75, 85, 99, 0.2)'
+                    color: 'rgba(75, 85, 99, 0.2)',
                 },
                 ticks: {
-                    color: '#9CA3AF'
-                }
-            }
+                    color: '#9CA3AF',
+                },
+            },
         },
         interaction: {
             mode: 'nearest',
             axis: 'x',
-            intersect: false
-        }
+            intersect: false,
+        },
     };
 
     // Get all unique days present in either dataset
-    const allDays = [...new Set([
-        ...previousMonthData.map(item => new Date(item.date).getDate()),
-        ...currentMonthData.map(item => new Date(item.date).getDate())
-    ])].sort((a, b) => a - b);
+    const allDays = [
+        ...new Set([
+            ...previousMonthData.map((item) => new Date(item.date).getDate()),
+            ...currentMonthData.map((item) => new Date(item.date).getDate()),
+        ]),
+    ].sort((a, b) => a - b);
 
     const data = {
         labels: allDays,
         datasets: [
             {
                 label: 'Current Month',
-                data: allDays.map(day => {
-                    const item = currentMonthData.find(d => new Date(d.date).getDate() === day);
+                data: allDays.map((day) => {
+                    const item = currentMonthData.find((d) => new Date(d.date).getDate() === day);
                     return item ? item.balance : null;
                 }),
                 borderColor: 'rgb(34, 197, 94)', // green-400
                 backgroundColor: 'rgba(34, 197, 94, 0.1)',
                 tension: 0,
                 fill: false,
-                spanGaps: true
+                spanGaps: true,
             },
             {
                 label: 'Previous Month',
-                data: allDays.map(day => {
-                    const item = previousMonthData.find(d => new Date(d.date).getDate() === day);
+                data: allDays.map((day) => {
+                    const item = previousMonthData.find((d) => new Date(d.date).getDate() === day);
                     return item ? item.balance : null;
                 }),
                 borderColor: 'rgb(156, 163, 175)', // gray-400
                 backgroundColor: 'rgba(156, 163, 175, 0.1)',
                 tension: 0,
                 fill: false,
-                spanGaps: true
+                spanGaps: true,
             },
         ],
     };
@@ -120,7 +103,7 @@ function AccountDetailMonthlyComparisonChart({ currentMonthData, previousMonthDa
         <div className="h-64">
             <Line options={options} data={data} />
         </div>
-            );
-            }
+    );
+}
 
-            export default AccountDetailMonthlyComparisonChart;
+export default AccountDetailMonthlyComparisonChart;

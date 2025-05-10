@@ -14,14 +14,14 @@ class AccountController extends Controller
         $accounts = Account::where('user_id', auth()->id())->get();
 
         return Inertia::render('accounts/index', [
-            'accounts' => $accounts
+            'accounts' => $accounts,
         ]);
     }
 
     public function store(Request $request)
     {
         try {
-            if (!auth()->id()) {
+            if (! auth()->id()) {
                 throw new \Exception('User not authenticated');
             }
 
@@ -45,14 +45,15 @@ class AccountController extends Controller
                 'balance' => $validated['balance'],
                 'is_gocardless_synced' => $validated['is_gocardless_synced'] ?? false,
                 'gocardless_account_id' => $validated['gocardless_account_id'] ?? null,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
 
             return redirect()->back()->with('success', 'Account created successfully');
 
         } catch (\Exception $e) {
-            \Log::error('Account creation failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to create account: ' . $e->getMessage());
+            \Log::error('Account creation failed: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to create account: '.$e->getMessage());
         }
     }
 
@@ -61,19 +62,18 @@ class AccountController extends Controller
 
         $account = Account::all()->find($id);
 
-        if (!$account) {
+        if (! $account) {
             return redirect()->route('accounts.index')->with('error', 'Account not found');
         }
 
         // Get the transactions for this account
         $transactions = $account->transactions()->get();
 
-
         // Calculate monthly summaries
         $monthlySummaries = [];
         foreach ($transactions as $transaction) {
             $month = \Carbon\Carbon::parse($transaction->booked_date)->translatedFormat('F Y');
-            if (!isset($monthlySummaries[$month])) {
+            if (! isset($monthlySummaries[$month])) {
                 $monthlySummaries[$month] = [
                     'income' => 0,
                     'expense' => 0,
@@ -88,12 +88,10 @@ class AccountController extends Controller
             $monthlySummaries[$month]['balance'] += $transaction->amount;
         }
 
-
         return Inertia::render('accounts/detail', [
             'account' => $account,
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,
         ]);
     }
-
 }

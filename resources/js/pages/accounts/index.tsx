@@ -1,17 +1,15 @@
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import CreateAccountModal from '@/components/accounts/CreateAccountModal';
-import { Account } from '@/types/index';
-import { router, Link, Head } from '@inertiajs/react';
 import GoCardlessImportWizard from '@/components/accounts/GoCardlessImportWizard';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import AppLayout from '@/layouts/app-layout';
+import { Account } from '@/types/index';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface Props {
     accounts: Account[];
 }
 
 export default function Index({ accounts }: Props) {
-
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
@@ -34,13 +32,13 @@ export default function Index({ accounts }: Props) {
                         <div>
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
-                                className="rounded-md mr-3 bg-white px-3 py-1 text-black cursor-pointer"
+                                className="mr-3 cursor-pointer rounded-md bg-white px-3 py-1 text-black"
                             >
                                 + New Account
                             </button>
                             <button
                                 onClick={() => setIsImportWizardOpen(true)}
-                                className="rounded-md mr-3 bg-white px-3 py-1 text-black cursor-pointer"
+                                className="mr-3 cursor-pointer rounded-md bg-white px-3 py-1 text-black"
                             >
                                 Import Account
                             </button>

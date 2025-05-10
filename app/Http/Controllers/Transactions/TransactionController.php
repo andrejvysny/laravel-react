@@ -19,7 +19,7 @@ class TransactionController extends Controller
         $monthlySummaries = [];
         foreach ($transactions as $transaction) {
             $month = \Carbon\Carbon::parse($transaction->booked_date)->translatedFormat('F Y');
-            if (!isset($monthlySummaries[$month])) {
+            if (! isset($monthlySummaries[$month])) {
                 $monthlySummaries[$month] = [
                     'income' => 0,
                     'expense' => 0,
@@ -33,7 +33,6 @@ class TransactionController extends Controller
             }
             $monthlySummaries[$month]['balance'] += $transaction->amount;
         }
-
 
         return Inertia::render('transactions/index', [
             'transactions' => $transactions,
@@ -57,15 +56,16 @@ class TransactionController extends Controller
                 'type' => 'required|string|in:TRANSFER,DEPOSIT,WITHDRAWAL,PAYMENT',
                 'metadata' => 'nullable|array',
                 'balance_after_transaction' => 'required|numeric',
-                'account_id' => 'required|exists:accounts,id'
+                'account_id' => 'required|exists:accounts,id',
             ]);
 
             $transaction = Transaction::create($validated);
 
             return redirect()->back()->with('success', 'Transaction created successfully');
         } catch (\Exception $e) {
-            \Log::error('Transaction creation failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to create transaction: ' . $e->getMessage());
+            \Log::error('Transaction creation failed: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to create transaction: '.$e->getMessage());
         }
     }
 }

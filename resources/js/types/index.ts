@@ -21,7 +21,6 @@ export interface Account {
     updated_at: string;
 }
 
-
 export interface Transaction {
     id: number;
     transaction_id: string;
@@ -64,6 +63,6 @@ export interface NavItem {
 }
 
 export interface BreadcrumbItem {
-    href: string,
-    title: string
+    href: string;
+    title: string;
 }

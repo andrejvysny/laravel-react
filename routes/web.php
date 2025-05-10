@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
 
-    if (!Auth::check()) {
+    if (! Auth::check()) {
         return redirect()->route('login');
     }
+
     return redirect()->route('dashboard');
 });
 

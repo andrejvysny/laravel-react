@@ -63,6 +63,7 @@ class TransactionRuleController extends Controller
     {
         $this->authorize('delete', $rule);
         $rule->delete();
+
         return redirect()->back();
     }
 

@@ -45,4 +45,4 @@ class UserSeeder extends Seeder
         // Create additional test users
         User::factory(5)->create();
     }
-} 
+}

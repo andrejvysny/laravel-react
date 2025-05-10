@@ -23,7 +23,7 @@ class AccountSeeder extends Seeder
                 'currency' => 'EUR',
                 'balance' => 5000.00,
                 'is_gocardless_synced' => true,
-                'gocardless_account_id' => 'ACC_' . strtoupper(substr(md5(rand()), 0, 8)),
+                'gocardless_account_id' => 'ACC_'.strtoupper(substr(md5(rand()), 0, 8)),
                 'gocardless_last_synced_at' => now(),
             ]);
 
@@ -51,9 +51,9 @@ class AccountSeeder extends Seeder
                 'currency' => 'GBP',
                 'balance' => -500.00,
                 'is_gocardless_synced' => true,
-                'gocardless_account_id' => 'ACC_' . strtoupper(substr(md5(rand()), 0, 8)),
+                'gocardless_account_id' => 'ACC_'.strtoupper(substr(md5(rand()), 0, 8)),
                 'gocardless_last_synced_at' => now()->subDays(2),
             ]);
         }
     }
-} 
+}

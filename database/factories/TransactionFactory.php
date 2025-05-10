@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Transaction;
 use App\Models\Account;
+use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TransactionFactory extends Factory
@@ -16,9 +16,9 @@ class TransactionFactory extends Factory
         $type = $this->faker->randomElement($types);
         $amount = $this->faker->randomFloat(2, -1000, 2000);
         $date = $this->faker->dateTimeBetween('-3 months', 'now');
-        
+
         return [
-            'transaction_id' => 'TRX-' . $this->faker->unique()->numerify('######'),
+            'transaction_id' => 'TRX-'.$this->faker->unique()->numerify('######'),
             'amount' => $amount,
             'currency' => 'EUR',
             'booked_date' => $date,
@@ -33,4 +33,4 @@ class TransactionFactory extends Factory
             'account_id' => Account::first()->id,
         ];
     }
-} 
+}

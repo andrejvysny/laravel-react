@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
@@ -45,4 +44,4 @@ class Account extends Model
     {
         return $this->hasMany(Transaction::class);
     }
-} 
+}

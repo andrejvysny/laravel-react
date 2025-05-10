@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import { useState } from 'react';
 
 interface Institution {
     id: string;
@@ -75,7 +75,7 @@ export default function GoCardlessImportWizard({ isOpen, onClose, onSuccess }: G
             const { data } = await axios.post('/api/gocardless/import', {
                 institution_id: institutionId,
             });
-            
+
             onSuccess();
             onClose();
 
@@ -91,31 +91,22 @@ export default function GoCardlessImportWizard({ isOpen, onClose, onSuccess }: G
     return (
         <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-            
+
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                <Dialog.Panel className="mx-auto max-w-2xl w-full bg-gray-900 rounded-xl p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <Dialog.Title className="text-xl font-semibold text-white">
-                            Import Account via GoCardless
-                        </Dialog.Title>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-white"
-                        >
+                <Dialog.Panel className="mx-auto w-full max-w-2xl rounded-xl bg-gray-900 p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                        <Dialog.Title className="text-xl font-semibold text-white">Import Account via GoCardless</Dialog.Title>
+                        <button onClick={onClose} className="text-gray-400 hover:text-white">
                             <XMarkIcon className="h-6 w-6" />
                         </button>
                     </div>
 
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
 
                     <div className="space-y-6">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-12">
-                                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
                                 <p className="mt-4 text-gray-400">Loading...</p>
                             </div>
                         ) : (
@@ -123,13 +114,13 @@ export default function GoCardlessImportWizard({ isOpen, onClose, onSuccess }: G
                                 {/* Step 1: Country Selection */}
                                 {step === 1 && (
                                     <div>
-                                        <h3 className="text-lg font-medium text-white mb-4">Select Country</h3>
+                                        <h3 className="mb-4 text-lg font-medium text-white">Select Country</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             {COUNTRIES.map((country) => (
                                                 <button
                                                     key={country.code}
                                                     onClick={() => handleCountrySelect(country.code)}
-                                                    className="p-4 bg-gray-800 rounded-lg text-white hover:bg-gray-700 transition-colors"
+                                                    className="rounded-lg bg-gray-800 p-4 text-white transition-colors hover:bg-gray-700"
                                                 >
                                                     {country.name}
                                                 </button>
@@ -141,20 +132,16 @@ export default function GoCardlessImportWizard({ isOpen, onClose, onSuccess }: G
                                 {/* Step 2: Institution Selection */}
                                 {step === 2 && (
                                     <div>
-                                        <h3 className="text-lg font-medium text-white mb-4">Select Bank</h3>
-                                        <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                                        <h3 className="mb-4 text-lg font-medium text-white">Select Bank</h3>
+                                        <div className="grid max-h-96 grid-cols-2 gap-4 overflow-y-auto">
                                             {institutions.map((institution) => (
                                                 <button
                                                     key={institution.id}
                                                     onClick={() => handleInstitutionSelect(institution)}
-                                                    className="p-4 bg-gray-800 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center gap-3"
+                                                    className="flex items-center gap-3 rounded-lg bg-gray-800 p-4 text-white transition-colors hover:bg-gray-700"
                                                 >
                                                     {institution.logo && (
-                                                        <img
-                                                            src={institution.logo}
-                                                            alt={institution.name}
-                                                            className="w-8 h-8 object-contain"
-                                                        />
+                                                        <img src={institution.logo} alt={institution.name} className="h-8 w-8 object-contain" />
                                                     )}
                                                     <span>{institution.name}</span>
                                                 </button>
@@ -165,16 +152,11 @@ export default function GoCardlessImportWizard({ isOpen, onClose, onSuccess }: G
 
                                 <div className="flex justify-between pt-4">
                                     {step > 1 && (
-                                        <button
-                                            onClick={() => setStep(step - 1)}
-                                            className="px-4 py-2 text-gray-400 hover:text-white"
-                                        >
+                                        <button onClick={() => setStep(step - 1)} className="px-4 py-2 text-gray-400 hover:text-white">
                                             Back
                                         </button>
                                     )}
-                                    <div className="ml-auto text-gray-400">
-                                        Step {step} of 2
-                                    </div>
+                                    <div className="ml-auto text-gray-400">Step {step} of 2</div>
                                 </div>
                             </>
                         )}

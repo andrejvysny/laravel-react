@@ -11,11 +11,11 @@ enum Currency: string
 
     public function symbol(): string
     {
-        return match($this) {
+        return match ($this) {
             self::EUR => '€',
             self::USD => '$',
             self::GBP => '£',
             self::CZK => 'Kč',
         };
     }
-} 
+}

@@ -1,12 +1,12 @@
-import AppLayout from '@/layouts/app-layout';
-import { Transaction, Account } from '@/types/index';
-import { Head } from '@inertiajs/react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import axios from 'axios';
-import { formatDate } from '@/utils/date';
-import TransactionList from '@/components/transactions/TransactionList';
 import AccountDetailMonthlyComparisonChart from '@/components/accounts/AccountDetailMonthlyComparisonChart';
+import TransactionList from '@/components/transactions/TransactionList';
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
+import { Account, Transaction } from '@/types/index';
+import { formatDate } from '@/utils/date';
+import { Head } from '@inertiajs/react';
+import axios from 'axios';
+import { useState } from 'react';
 
 interface Props {
     account: Account;
@@ -36,19 +36,31 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
 
     // Group transactions by month and then by date
     const groupedByMonth: Record<string, Record<string, Transaction[]>> = {};
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction) => {
         const monthKey = new Date(transaction.booked_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         const dateKey = new Date(transaction.booked_date).toLocaleDateString('sk-SK', {
             weekday: 'long',
             day: 'numeric',
-            month: 'long'
+            month: 'long',
         });
         if (!groupedByMonth[monthKey]) groupedByMonth[monthKey] = {};
         if (!groupedByMonth[monthKey][dateKey]) groupedByMonth[monthKey][dateKey] = [];
         const { key, ...rest } = transaction as any;
-        groupedByMonth[monthKey][dateKey].push({ ...rest, account: transaction.account ?? { id: 0, name: '', account_id: '', bank_name: '', iban: '', currency: '', balance: 0, created_at: '', updated_at: '' } } as TransactionType);
+        groupedByMonth[monthKey][dateKey].push({
+            ...rest,
+            account: transaction.account ?? {
+                id: 0,
+                name: '',
+                account_id: '',
+                bank_name: '',
+                iban: '',
+                currency: '',
+                balance: 0,
+                created_at: '',
+                updated_at: '',
+            },
+        } as TransactionType);
     });
-
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -112,61 +124,59 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                     </div>
                     {/* Right: Transactions List */}
                     <div className="flex-1">
-                        <div className="flex flex-col mb-6">
-                            <div className=" rounded-xl bg-gray-900 p-6">
+                        <div className="mb-6 flex flex-col">
+                            <div className="rounded-xl bg-gray-900 p-6">
                                 <h3 className="mb-4 text-lg font-semibold">Monthly comparison</h3>
 
                                 <AccountDetailMonthlyComparisonChart
                                     currentMonthData={[
-                                        { date: "2024-03-01", balance: 923 },
-                                        { date: "2024-03-02", balance: 900 },
-                                        { date: "2024-03-03", balance: 913 },
-                                        { date: "2024-03-04", balance: 918 },
-                                        { date: "2024-03-05", balance: 893 },
-                                        { date: "2024-03-06", balance: 828 },
-                                        { date: "2024-03-07", balance: 733 },
-                                        { date: "2024-03-08", balance: 838 },
-                                        { date: "2024-03-09", balance: 843 },
-                                        { date: "2024-03-10", balance: 918 },
-
+                                        { date: '2024-03-01', balance: 923 },
+                                        { date: '2024-03-02', balance: 900 },
+                                        { date: '2024-03-03', balance: 913 },
+                                        { date: '2024-03-04', balance: 918 },
+                                        { date: '2024-03-05', balance: 893 },
+                                        { date: '2024-03-06', balance: 828 },
+                                        { date: '2024-03-07', balance: 733 },
+                                        { date: '2024-03-08', balance: 838 },
+                                        { date: '2024-03-09', balance: 843 },
+                                        { date: '2024-03-10', balance: 918 },
                                     ]}
                                     previousMonthData={[
-                                        { date: "2024-02-01", balance: 850 },
-                                        { date: "2024-02-02", balance: 720 },
-                                        { date: "2024-02-03", balance: 695 },
-                                        { date: "2024-02-04", balance: 810 },
-                                        { date: "2024-02-05", balance: 790 },
-                                        { date: "2024-02-06", balance: 860 },
-                                        { date: "2024-02-07", balance: 840 },
-                                        { date: "2024-02-08", balance: 795 },
-                                        { date: "2024-02-09", balance: 920 },
-                                        { date: "2024-02-10", balance: 890 },
-                                        { date: "2024-02-11", balance: 850 },
-                                        { date: "2024-02-12", balance: 780 },
-                                        { date: "2024-02-13", balance: 910 },
-                                        { date: "2024-02-14", balance: 875 },
-                                        { date: "2024-02-15", balance: 950 },
-                                        { date: "2024-02-16", balance: 920 },
-                                        { date: "2024-02-17", balance: 890 },
-                                        { date: "2024-02-18", balance: 860 },
-                                        { date: "2024-02-19", balance: 930 },
-                                        { date: "2024-02-20", balance: 895 },
-                                        { date: "2024-02-21", balance: 870 },
-                                        { date: "2024-02-22", balance: 940 },
-                                        { date: "2024-02-23", balance: 910 },
-                                        { date: "2024-02-24", balance: 880 },
-                                        { date: "2024-02-25", balance: 850 },
-                                        { date: "2024-02-26", balance: 920 },
-                                        { date: "2024-02-27", balance: 890 },
-                                        { date: "2024-02-28", balance: 960 },
-                                        { date: "2024-02-29", balance: 930 },
+                                        { date: '2024-02-01', balance: 850 },
+                                        { date: '2024-02-02', balance: 720 },
+                                        { date: '2024-02-03', balance: 695 },
+                                        { date: '2024-02-04', balance: 810 },
+                                        { date: '2024-02-05', balance: 790 },
+                                        { date: '2024-02-06', balance: 860 },
+                                        { date: '2024-02-07', balance: 840 },
+                                        { date: '2024-02-08', balance: 795 },
+                                        { date: '2024-02-09', balance: 920 },
+                                        { date: '2024-02-10', balance: 890 },
+                                        { date: '2024-02-11', balance: 850 },
+                                        { date: '2024-02-12', balance: 780 },
+                                        { date: '2024-02-13', balance: 910 },
+                                        { date: '2024-02-14', balance: 875 },
+                                        { date: '2024-02-15', balance: 950 },
+                                        { date: '2024-02-16', balance: 920 },
+                                        { date: '2024-02-17', balance: 890 },
+                                        { date: '2024-02-18', balance: 860 },
+                                        { date: '2024-02-19', balance: 930 },
+                                        { date: '2024-02-20', balance: 895 },
+                                        { date: '2024-02-21', balance: 870 },
+                                        { date: '2024-02-22', balance: 940 },
+                                        { date: '2024-02-23', balance: 910 },
+                                        { date: '2024-02-24', balance: 880 },
+                                        { date: '2024-02-25', balance: 850 },
+                                        { date: '2024-02-26', balance: 920 },
+                                        { date: '2024-02-27', balance: 890 },
+                                        { date: '2024-02-28', balance: 960 },
+                                        { date: '2024-02-29', balance: 930 },
                                     ]}
-                                />                            </div>
+                                />
+                            </div>
                         </div>
                         <div className="flex flex-col gap-6">
-
-                            <TransactionList transactions={transactions} monthlySummaries={monthlySummaries}/>
-
+                            <TransactionList transactions={transactions} monthlySummaries={monthlySummaries} />
                         </div>
                     </div>
                 </div>

@@ -10,15 +10,11 @@ class TransactionRulePipeline
 {
     /**
      * The user ID to process rules for.
-     *
-     * @var int
      */
     private int $userId;
 
     /**
      * Create a new transaction rule pipeline instance.
-     *
-     * @param int $userId
      */
     public function __construct(int $userId)
     {
@@ -27,9 +23,6 @@ class TransactionRulePipeline
 
     /**
      * Process a transaction through all active rules.
-     *
-     * @param Transaction $transaction
-     * @return Transaction
      */
     public function process(Transaction $transaction): Transaction
     {
@@ -53,23 +46,19 @@ class TransactionRulePipeline
     /**
      * Create a rule instance for processing.
      *
-     * @param TransactionRule $rule
      * @return object
      */
     private function createRuleInstance(TransactionRule $rule)
     {
-        return new class($rule) {
+        return new class($rule)
+        {
             /**
              * The transaction rule instance.
-             *
-             * @var TransactionRule
              */
             private TransactionRule $rule;
 
             /**
              * Create a new rule instance.
-             *
-             * @param TransactionRule $rule
              */
             public function __construct(TransactionRule $rule)
             {
@@ -78,9 +67,6 @@ class TransactionRulePipeline
 
             /**
              * Process the transaction through this rule.
-             *
-             * @param Transaction $transaction
-             * @return Transaction
              */
             public function __invoke(Transaction $transaction): Transaction
             {
@@ -93,9 +79,6 @@ class TransactionRulePipeline
 
             /**
              * Check if the transaction matches the rule condition.
-             *
-             * @param Transaction $transaction
-             * @return bool
              */
             private function matchesCondition(Transaction $transaction): bool
             {
@@ -109,9 +92,6 @@ class TransactionRulePipeline
 
             /**
              * Check if the transaction amount matches the rule condition.
-             *
-             * @param Transaction $transaction
-             * @return bool
              */
             private function matchesAmount(Transaction $transaction): bool
             {
@@ -128,9 +108,6 @@ class TransactionRulePipeline
 
             /**
              * Check if the transaction IBAN matches the rule condition.
-             *
-             * @param Transaction $transaction
-             * @return bool
              */
             private function matchesIban(Transaction $transaction): bool
             {
@@ -143,9 +120,6 @@ class TransactionRulePipeline
 
             /**
              * Check if the transaction description matches the rule condition.
-             *
-             * @param Transaction $transaction
-             * @return bool
              */
             private function matchesDescription(Transaction $transaction): bool
             {
@@ -167,4 +141,4 @@ class TransactionRulePipeline
             }
         };
     }
-} 
+}

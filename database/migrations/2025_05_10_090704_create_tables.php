@@ -82,7 +82,7 @@ return new class extends Migration
         Schema::dropIfExists('transaction_rules');
         Schema::dropIfExists('transactions');
         Schema::dropIfExists('accounts');
-        
+
         // Remove GoCardless fields from users table
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
@@ -92,7 +92,7 @@ return new class extends Migration
                 'gocardless_refresh_token',
                 'gocardless_refresh_token_expires_at',
                 'gocardless_access_token_expires_at',
-                'gocardless_country'
+                'gocardless_country',
             ]);
         });
     }

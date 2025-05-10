@@ -63,4 +63,4 @@ class DashboardController extends Controller
             'monthlyBalances' => $monthlyBalances,
         ]);
     }
-} 
+}

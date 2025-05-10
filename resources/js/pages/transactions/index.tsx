@@ -1,11 +1,11 @@
 //WIP
 
+import CreateTransactionModal from '@/components/transactions/CreateTransactionModal';
+import TransactionList from '@/components/transactions/TransactionList';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Transaction } from '@/types/index';
 import { Head, router } from '@inertiajs/react';
-import CreateTransactionModal from '@/components/transactions/CreateTransactionModal';
 import { useState } from 'react';
-import TransactionList from '@/components/transactions/TransactionList';
 
 interface Props {
     transactions: Transaction[];
@@ -56,8 +56,6 @@ export default function Index({ transactions, monthlySummaries }: Props) {
                         <div className="sticky top-8">
                             <div className="mb-6 w-full rounded-xl bg-gray-900 p-6">
                                 <h3 className="mb-4 text-lg font-semibold">Filters</h3>
-
-
                             </div>
 
                             {/* Analytics/Graphs Placeholder */}
