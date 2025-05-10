@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { TransactionType } from '@/types';
+import { Transaction } from '@/types/index';
 
 interface CreateTransactionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (transaction: Omit<TransactionType, 'id' | 'created_at' | 'updated_at' | 'account'>) => void;
+    onSubmit: (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'account'>) => void;
 }
 
 export default function CreateTransactionModal({ isOpen, onClose, onSubmit }: CreateTransactionModalProps) {
@@ -37,14 +37,14 @@ export default function CreateTransactionModal({ isOpen, onClose, onSubmit }: Cr
     if (!isOpen) return null;
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
             <div className="bg-gray-900 rounded-xl p-6 w-full max-w-md">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">New Transaction</h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-white"
                     >
@@ -141,4 +141,4 @@ export default function CreateTransactionModal({ isOpen, onClose, onSubmit }: Cr
             </div>
         </div>
     );
-} 
+}

@@ -21,7 +21,8 @@ export interface Account {
     updated_at: string;
 }
 
-export interface TransactionType {
+
+export interface Transaction {
     id: number;
     transaction_id: string;
     amount: number;
@@ -62,22 +63,7 @@ export interface NavItem {
     icon: React.ComponentType<{ className?: string }>;
 }
 
-export interface Transaction {
-    id: number;
-    transaction_id: string;
-    amount: number;
-    currency: string;
-    booked_date: string;
-    processed_date: string;
-    description: string;
-    target_iban: string | null;
-    source_iban: string | null;
-    partner: string;
-    type: string;
-    metadata: Record<string, any> | null;
-    balance_after_transaction: number;
-    account_id: number;
-    account?: Account;
-    created_at: string;
-    updated_at: string;
-} 
+export interface BreadcrumbItem {
+    href: string,
+    title: string
+}

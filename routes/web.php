@@ -1,20 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Accounts\AccountController;
+use App\Http\Controllers\BankProviders\GoCardlessController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TransactionRuleController;
-use App\Http\Controllers\GoCardlessController;
+use App\Http\Controllers\Transactions\TransactionController;
+use App\Http\Controllers\Transactions\TransactionRuleController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
 
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
+    if (!Auth::check()) {
+        return redirect()->route('login');
     }
-    return Inertia::render('welcome');
-})->name('home');
+    return redirect()->route('dashboard');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

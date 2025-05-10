@@ -1,8 +1,8 @@
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import { NavFooter } from '@/components/app/sidebar/nav-footer';
+import { NavMain } from '@/components/app/sidebar/nav-main';
+import { NavUser } from '@/components/app/sidebar/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { type NavItem } from '@/types/index';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users, Coins, PieChartIcon, TagIcon } from 'lucide-react';
 import AppLogo from './app-logo';

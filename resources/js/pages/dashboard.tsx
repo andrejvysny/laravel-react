@@ -163,7 +163,7 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                                     <tr key={tx.id} className="border-t border-gray-800">
                                         <td className="px-2 py-1">{new Date(tx.booked_date).toLocaleDateString()}</td>
                                         <td className="px-2 py-1">{tx.description}</td>
-                                        <td className="px-2 py-1">{tx.account?.name ?? '-'}</td>
+                                        <td className="px-2 py-1">{tx.account_id ?? '-'}</td>
                                         <td className={`px-2 py-1 text-right font-medium ${tx.amount < 0 ? 'text-red-400' : 'text-green-400'}`}>
                                             {Number(tx.amount).toFixed(2)} {tx.currency}
                                         </td>

@@ -1,22 +1,15 @@
-import { TransactionType } from '@/types';
+import { Transaction } from '@/types/index';
+import {formatDate} from '@/utils/date';
 
-interface TransactionDetailsProps {
-    transaction: TransactionType;
+interface Props {
+    transaction: Transaction;
 }
 
-export default function TransactionDetails({ transaction }: TransactionDetailsProps) {
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString('sk-SK', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+export default function TransactionDetails({ transaction }: Props) {
+
 
     return (
-        <div className="bg-gray-800 rounded-xl p-4 mt-2">
+        <div className="bg-gray-800 rounded-xl p-4">
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="text-gray-400 text-sm">Amount</p>
@@ -74,4 +67,4 @@ export default function TransactionDetails({ transaction }: TransactionDetailsPr
             )}
         </div>
     );
-} 
+}

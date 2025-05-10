@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\BankProviders;
 
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Transaction;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -255,7 +257,7 @@ class GoCardlessController extends Controller
 
             if ($transactionResponse->successful()) {
                 $transactions = $transactionResponse->json()['transactions']['booked'];
-                
+
                 foreach ($transactions as $transaction) {
                     // Create or update transaction
                     Transaction::updateOrCreate(
@@ -308,7 +310,7 @@ class GoCardlessController extends Controller
                 default => Transaction::TYPE_PAYMENT,
             };
         }
-        
+
         return Transaction::TYPE_PAYMENT;
     }
 

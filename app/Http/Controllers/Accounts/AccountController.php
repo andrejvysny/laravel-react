@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Accounts;
 
+use App\Http\Controllers\Controller;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +13,7 @@ class AccountController extends Controller
     {
         $accounts = Account::where('user_id', auth()->id())->get();
 
-        return Inertia::render('accounts', [
+        return Inertia::render('accounts/index', [
             'accounts' => $accounts
         ]);
     }
@@ -68,11 +69,27 @@ class AccountController extends Controller
         $transactions = $account->transactions()->get();
 
 
-        // Calculate monthly summaries for this account
+        // Calculate monthly summaries
         $monthlySummaries = [];
+        foreach ($transactions as $transaction) {
+            $month = \Carbon\Carbon::parse($transaction->booked_date)->translatedFormat('F Y');
+            if (!isset($monthlySummaries[$month])) {
+                $monthlySummaries[$month] = [
+                    'income' => 0,
+                    'expense' => 0,
+                    'balance' => 0,
+                ];
+            }
+            if ($transaction->amount > 0) {
+                $monthlySummaries[$month]['income'] += $transaction->amount;
+            } else {
+                $monthlySummaries[$month]['expense'] += abs($transaction->amount);
+            }
+            $monthlySummaries[$month]['balance'] += $transaction->amount;
+        }
 
 
-        return Inertia::render('account-detail', [
+        return Inertia::render('accounts/detail', [
             'account' => $account,
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,

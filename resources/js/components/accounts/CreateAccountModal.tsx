@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Currency } from '@/types';
+import { Currency } from '@/types/index';
 
 interface CreateAccountModalProps {
     isOpen: boolean;
@@ -151,4 +151,4 @@ export default function CreateAccountModal({ isOpen, onClose, onSubmit }: Create
             </div>
         </div>
     );
-} 
+}

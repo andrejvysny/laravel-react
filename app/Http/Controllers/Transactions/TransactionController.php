@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Transactions;
 
+use App\Http\Controllers\Controller;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Transaction; 
 
 class TransactionController extends Controller
 {
@@ -13,7 +14,7 @@ class TransactionController extends Controller
         $transactions = Transaction::with('account')
             ->orderBy('booked_date', 'desc')
             ->get();
-        
+
         // Calculate monthly summaries
         $monthlySummaries = [];
         foreach ($transactions as $transaction) {
@@ -34,7 +35,7 @@ class TransactionController extends Controller
         }
 
 
-        return Inertia::render('transactions', [
+        return Inertia::render('transactions/index', [
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,
         ]);
