@@ -3,6 +3,8 @@ import { TransactionType, Account } from '@/types';
 import { Head } from '@inertiajs/react';
 import TransactionComponent from '@/components/Transaction';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import axios from 'axios';
 
 interface Props {
     account: Account;
@@ -11,10 +13,24 @@ interface Props {
 }
 
 export default function AccountDetail({ account, transactions, monthlySummaries }: Props) {
+    const [syncing, setSyncing] = useState(false);
     const breadcrumbs = [
         { title: 'Accounts', href: '/accounts' },
         { title: account.name, href: `/accounts/${account.id}` },
     ];
+
+    const handleSyncTransactions = async () => {
+        setSyncing(true);
+        try {
+            await axios.post(`/api/accounts/${account.id}/sync-transactions`);
+            // Refresh the page to show new transactions
+            window.location.reload();
+        } catch (error) {
+            // Handle error silently
+        } finally {
+            setSyncing(false);
+        }
+    };
 
     // Group transactions by month and then by date
     const groupedByMonth: Record<string, Record<string, TransactionType[]>> = {};
@@ -50,9 +66,24 @@ export default function AccountDetail({ account, transactions, monthlySummaries 
                             <div className="text-gray-400 mb-2">{account.bank_name}</div>
                             <div className="flex flex-col gap-1 text-sm">
                                 <span><strong>IBAN:</strong> {account.iban}</span>
-                                <span><strong>Account ID:</strong> {account.account_id}</span>
+                                <span><strong>Type:</strong> {account.type}</span>
                                 <span><strong>Currency:</strong> {account.currency}</span>
                                 <span><strong>Balance:</strong> {Number(account.balance).toFixed(2)} {account.currency}</span>
+                                {account.is_gocardless_synced && (
+                                    <>
+                                        <span><strong>GoCardless Account ID:</strong> {account.gocardless_account_id}</span>
+                                        <span><strong>Last Synced:</strong> {account.gocardless_last_synced_at ? new Date(account.gocardless_last_synced_at).toLocaleString() : 'Never'}</span>
+                                        <div className="mt-4">
+                                            <Button 
+                                                onClick={handleSyncTransactions}
+                                                disabled={syncing}
+                                                className="w-full"
+                                            >
+                                                {syncing ? "Syncing..." : "Sync Transactions"}
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             <div className="mt-4">
                                 <button className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Account Settings</button>

@@ -9,11 +9,21 @@ use Illuminate\Support\Facades\Log;
 
 class GoCardlessController extends Controller
 {
-    private $baseUrl = 'https://bankaccountdata.gocardless.com/api/v2';
+    /**
+     * The base URL for the GoCardless API.
+     *
+     * @var string
+     */
+    private string $baseUrl = 'https://bankaccountdata.gocardless.com/api/v2';
 
+    /**
+     * Get a list of institutions for a given country.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getInstitutions(Request $request)
     {
-
         $request->validate([
             'country' => 'required|string|size:2'
         ]);
@@ -46,6 +56,12 @@ class GoCardlessController extends Controller
         }
     }
 
+    /**
+     * Import an account from GoCardless.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function importAccount(Request $request)
     {
         $request->validate([
@@ -158,11 +174,14 @@ class GoCardlessController extends Controller
                     Account::create([
                         'user_id' => auth()->id(),
                         'name' => 'Imported Account ' . ($accountData['ownerName'] ?? ''),
-                        'account_id' => $accountId,
-                        'bank_name' => null,
+                        'gocardless_account_id' => $accountId,
+                        'bank_name' => $accountData['institution'] ?? null,
                         'iban' => $accountData['iban'] ?? '',
+                        'type' => 'checking',
                         'currency' => $accountData['currency'] ?? 'EUR',
                         'balance' => 0,
+                        'is_gocardless_synced' => true,
+                        'gocardless_last_synced_at' => now(),
                     ]);
                 } else {
                     session()->flash('error', 'Failed to fetch account details');
@@ -177,6 +196,183 @@ class GoCardlessController extends Controller
                 'message' => $e->getMessage()
             ]);
             return redirect()->route('accounts.index')->with('error', 'Failed to import accounts');
+        }
+    }
+
+    /**
+     * Refresh the access token.
+     *
+     * @return void
+     */
+    public function refreshAccessToken()
+    {
+        $tokenResponse = Http::post("{$this->baseUrl}/token/refresh/", [
+            'refresh_token' => config('services.gocardless.refresh_token')
+        ]);
+    }
+
+    /**
+     * Refresh the refresh token.
+     *
+     * @return void
+     */
+    public function refreshRefreshToken()
+    {
+        $tokenResponse = Http::post("{$this->baseUrl}/token/refresh/", [
+            'refresh_token' => config('services.gocardless.refresh_token')
+        ]);
+    }
+
+    /**
+     * Import transactions for a given date range and optionally for a specific account.
+     *
+     * @param string $dateFrom Start date in Y-m-d format
+     * @param string $dateTo End date in Y-m-d format
+     * @param int|null $accountId Optional account ID to import transactions for
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function importTransactions(string $dateFrom, string $dateTo, int $accountId)
+    {
+        try {
+            // Get single account
+            $account = Account::where('user_id', auth()->id())
+                ->where('id', $accountId)
+                ->first();
+
+            if (!$account) {
+                return redirect()->route('accounts.index')->with('error', 'Account not found');
+            }
+
+            $transactionResponse = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.gocardless.access_token'),
+                'Accept' => 'application/json',
+            ])->get("{$this->baseUrl}/accounts/{$account->account_id}/transactions/", [
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo
+            ]);
+
+            Log::info("Transactions Response", ['success' => $transactionResponse->successful()]);
+
+            if ($transactionResponse->successful()) {
+                $transactions = $transactionResponse->json()['transactions']['booked'];
+                
+                foreach ($transactions as $transaction) {
+                    // Create or update transaction
+                    Transaction::updateOrCreate(
+                        ['transaction_id' => $transaction['transactionId']],
+                        [
+                            'account_id' => $account->id,
+                            'amount' => $transaction['transactionAmount']['amount'],
+                            'currency' => $transaction['transactionAmount']['currency'],
+                            'booked_date' => $transaction['bookingDate'],
+                            'processed_date' => $transaction['valueDate'] ?? $transaction['bookingDate'],
+                            'description' => implode(' ', $transaction['remittanceInformationUnstructuredArray'] ?? []),
+                            'target_iban' => $transaction['creditorAccount']['iban'] ?? null,
+                            'source_iban' => $transaction['debtorAccount']['iban'] ?? null,
+                            'partner' => $transaction['creditorName'] ?? $transaction['debtorName'] ?? '',
+                            'type' => $this->determineTransactionType($transaction),
+                            'metadata' => json_encode($transaction['currencyExchange']),
+                            'balance_after_transaction' => $transaction['balanceAfterTransaction'] ?? 0,
+                        ]
+                    );
+                }
+            } else {
+                Log::error('Failed to fetch transactions', ['response' => $transactionResponse->json()]);
+                return redirect()->route('accounts.index')->with('error', 'Failed to import transactions');
+            }
+
+            return redirect()->route('accounts.index')->with('success', 'Transactions imported successfully');
+
+        } catch (\Exception $e) {
+            Log::error('Transaction import error', [
+                'message' => $e->getMessage()
+            ]);
+            return redirect()->route('accounts.index')->with('error', 'Failed to import transactions');
+        }
+    }
+
+    /**
+     * Determine transaction type based on transaction data.
+     *
+     * @param array $transaction
+     * @return string
+     */
+    private function determineTransactionType(array $transaction): string
+    {
+        if (isset($transaction['proprietaryBankTransactionCode'])) {
+            return match ($transaction['proprietaryBankTransactionCode']) {
+                'TRANSFER' => Transaction::TYPE_TRANSFER,
+                'CARD_PAYMENT' => Transaction::TYPE_CARD_PAYMENT,
+                'EXCHANGE' => Transaction::TYPE_EXCHANGE,
+                'TOPUP' => Transaction::TYPE_DEPOSIT,
+                default => Transaction::TYPE_PAYMENT,
+            };
+        }
+        
+        return Transaction::TYPE_PAYMENT;
+    }
+
+    /**
+     * Sync transactions for an account.
+     *
+     * @param Account $account
+     * @return void
+     */
+    public function syncTransactions(Account $account)
+    {
+        if (!$account->is_gocardless_synced) {
+            return response()->json(['error' => 'Account is not synced with GoCardless'], 400);
+        }
+
+        try {
+            // Get access token
+            $tokenResponse = Http::post("{$this->baseUrl}/token/new/", [
+                'secret_id' => $account->user->gocardless_secret_id,
+                'secret_key' => $account->user->gocardless_secret_key
+            ]);
+
+            if (!$tokenResponse->successful()) {
+                return response()->json(['error' => 'Invalid credentials'], 401);
+            }
+
+            $accessToken = $tokenResponse->json()['access'];
+
+            // Get transactions
+            $transactionsResponse = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $accessToken,
+                'accept' => 'application/json'
+            ])->get("{$this->baseUrl}/accounts/{$account->gocardless_account_id}/transactions/");
+
+            if (!$transactionsResponse->successful()) {
+                return response()->json(['error' => 'Failed to fetch transactions'], 500);
+            }
+
+            $transactions = $transactionsResponse->json()['results'];
+
+            // Process transactions
+            foreach ($transactions as $transaction) {
+                Transaction::updateOrCreate(
+                    ['transaction_id' => $transaction['id']],
+                    [
+                        'account_id' => $account->id,
+                        'amount' => $transaction['amount'],
+                        'currency' => $transaction['currency'],
+                        'description' => $transaction['description'],
+                        'date' => $transaction['date'],
+                        'type' => $transaction['type'],
+                        'status' => $transaction['status'],
+                    ]
+                );
+            }
+
+            // Update last synced timestamp
+            $account->update([
+                'gocardless_last_synced_at' => now()
+            ]);
+
+            return response()->json(['message' => 'Transactions synced successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to sync transactions: ' . $e->getMessage()], 500);
         }
     }
 }

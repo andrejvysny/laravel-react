@@ -27,8 +27,15 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => Hash::make('password'),
             'remember_token' => Str::random(10),
+            'gocardless_secret_id' => null,
+            'gocardless_secret_key' => null,
+            'gocardless_access_token' => null,
+            'gocardless_refresh_token' => null,
+            'gocardless_refresh_token_expires_at' => null,
+            'gocardless_access_token_expires_at' => null,
+            'gocardless_country' => fake()->randomElement(['DE', 'GB', 'US']),
         ];
     }
 

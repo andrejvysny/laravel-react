@@ -10,7 +10,7 @@ class AccountController extends Controller
 {
     public function index()
     {
-        $accounts = Account::all();
+        $accounts = Account::where('user_id', auth()->id())->get();
 
         return Inertia::render('accounts', [
             'accounts' => $accounts
@@ -19,18 +19,40 @@ class AccountController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'account_id' => 'required|string|max:255', 
-            'bank_name' => 'required|string|max:255',
-            'iban' => 'required|string|max:255',
-            'currency' => 'required|string|max:3',
-            'balance' => 'required|numeric',
-        ]);
+        try {
+            if (!auth()->id()) {
+                throw new \Exception('User not authenticated');
+            }
 
-            $account = Account::create($validated);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'bank_name' => 'nullable|string|max:255',
+                'iban' => 'nullable|string|max:255',
+                'type' => 'required|string|max:255',
+                'currency' => 'required|string|max:3',
+                'balance' => 'required|numeric',
+                'is_gocardless_synced' => 'boolean',
+                'gocardless_account_id' => 'nullable|string|max:255',
+            ]);
 
-        return redirect()->back();
+            $account = Account::create([
+                'name' => $validated['name'],
+                'bank_name' => $validated['bank_name'] ?? null,
+                'iban' => $validated['iban'] ?? null,
+                'type' => $validated['type'],
+                'currency' => $validated['currency'],
+                'balance' => $validated['balance'],
+                'is_gocardless_synced' => $validated['is_gocardless_synced'] ?? false,
+                'gocardless_account_id' => $validated['gocardless_account_id'] ?? null,
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->back()->with('success', 'Account created successfully');
+
+        } catch (\Exception $e) {
+            \Log::error('Account creation failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create account: ' . $e->getMessage());
+        }
     }
 
     public function show($id)

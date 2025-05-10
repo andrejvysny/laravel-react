@@ -8,13 +8,29 @@ use Illuminate\Pipeline\Pipeline;
 
 class TransactionRulePipeline
 {
+    /**
+     * The user ID to process rules for.
+     *
+     * @var int
+     */
     private int $userId;
 
+    /**
+     * Create a new transaction rule pipeline instance.
+     *
+     * @param int $userId
+     */
     public function __construct(int $userId)
     {
         $this->userId = $userId;
     }
 
+    /**
+     * Process a transaction through all active rules.
+     *
+     * @param Transaction $transaction
+     * @return Transaction
+     */
     public function process(Transaction $transaction): Transaction
     {
         $rules = TransactionRule::where('user_id', $this->userId)
@@ -34,16 +50,38 @@ class TransactionRulePipeline
             });
     }
 
+    /**
+     * Create a rule instance for processing.
+     *
+     * @param TransactionRule $rule
+     * @return object
+     */
     private function createRuleInstance(TransactionRule $rule)
     {
         return new class($rule) {
+            /**
+             * The transaction rule instance.
+             *
+             * @var TransactionRule
+             */
             private TransactionRule $rule;
 
+            /**
+             * Create a new rule instance.
+             *
+             * @param TransactionRule $rule
+             */
             public function __construct(TransactionRule $rule)
             {
                 $this->rule = $rule;
             }
 
+            /**
+             * Process the transaction through this rule.
+             *
+             * @param Transaction $transaction
+             * @return Transaction
+             */
             public function __invoke(Transaction $transaction): Transaction
             {
                 if ($this->matchesCondition($transaction)) {
@@ -53,6 +91,12 @@ class TransactionRulePipeline
                 return $transaction;
             }
 
+            /**
+             * Check if the transaction matches the rule condition.
+             *
+             * @param Transaction $transaction
+             * @return bool
+             */
             private function matchesCondition(Transaction $transaction): bool
             {
                 return match ($this->rule->condition_type) {
@@ -63,6 +107,12 @@ class TransactionRulePipeline
                 };
             }
 
+            /**
+             * Check if the transaction amount matches the rule condition.
+             *
+             * @param Transaction $transaction
+             * @return bool
+             */
             private function matchesAmount(Transaction $transaction): bool
             {
                 $amount = (float) $transaction->amount;
@@ -76,6 +126,12 @@ class TransactionRulePipeline
                 };
             }
 
+            /**
+             * Check if the transaction IBAN matches the rule condition.
+             *
+             * @param Transaction $transaction
+             * @return bool
+             */
             private function matchesIban(Transaction $transaction): bool
             {
                 return match ($this->rule->condition_operator) {
@@ -85,11 +141,17 @@ class TransactionRulePipeline
                 };
             }
 
+            /**
+             * Check if the transaction description matches the rule condition.
+             *
+             * @param Transaction $transaction
+             * @return bool
+             */
             private function matchesDescription(Transaction $transaction): bool
             {
                 return match ($this->rule->condition_operator) {
-                    'contains' => str_contains(strtolower($transaction->description), strtolower($this->rule->condition_value)),
-                    'equals' => strtolower($transaction->description) === strtolower($this->rule->condition_value),
+                    'contains' => str_contains($transaction->description, $this->rule->condition_value),
+                    'equals' => $transaction->description === $this->rule->condition_value,
                     default => false,
                 };
             }

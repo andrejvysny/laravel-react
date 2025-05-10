@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TransactionRule extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
         'user_id',
         'name',
@@ -20,11 +25,21 @@ class TransactionRule extends Model
         'order',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'is_active' => 'boolean',
         'order' => 'integer',
     ];
 
+    /**
+     * Get the user that owns the transaction rule.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

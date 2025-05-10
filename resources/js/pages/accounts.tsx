@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function Accounts({ accounts }: Props) {
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
@@ -64,10 +65,6 @@ export default function Accounts({ accounts }: Props) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-400">Account ID</span>
-                                        <span className="text-white">{account.account_id}</span>
-                                    </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-400">IBAN</span>
                                         <span className="text-white">{account.iban}</span>

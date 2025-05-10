@@ -7,20 +7,40 @@ use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
+        'user_id',
         'name',
+        'bank_name',
         'iban',
+        'type',
         'currency',
         'balance',
-        'account_id',
-        'bank_name',
+        'gocardless_account_id',
+        'is_gocardless_synced',
+        'gocardless_last_synced_at',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'balance' => 'decimal:2',
-        'currency' => Currency::class,
+        'is_gocardless_synced' => 'boolean',
+        'gocardless_last_synced_at' => 'datetime',
     ];
 
+    /**
+     * Get the transactions for the account.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function transactions()
     {
         return $this->hasMany(Transaction::class);

@@ -25,7 +25,9 @@ class User extends Authenticatable
         'gocardless_secret_key',
         'gocardless_access_token',
         'gocardless_refresh_token',
-        'gocardless_token_expires_at',
+        'gocardless_refresh_token_expires_at',
+        'gocardless_access_token_expires_at',
+        'gocardless_country',
     ];
 
     /**

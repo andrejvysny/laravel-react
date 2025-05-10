@@ -7,12 +7,16 @@ export enum Currency {
 
 export interface Account {
     id: number;
+    user_id: number;
     name: string;
-    account_id: string;
-    bank_name: string;
-    iban: string;
-    currency: Currency;
+    bank_name: string | null;
+    iban: string | null;
+    type: string;
+    currency: string;
     balance: number;
+    gocardless_account_id: string | null;
+    is_gocardless_synced: boolean;
+    gocardless_last_synced_at: string | null;
     created_at: string;
     updated_at: string;
 }
