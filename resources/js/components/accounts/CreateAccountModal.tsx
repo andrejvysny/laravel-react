@@ -13,6 +13,7 @@ export default function CreateAccountModal({ isOpen, onClose, onSubmit }: Create
         account_id: '',
         bank_name: '',
         iban: '',
+        type: 'Default',
         currency: Currency.EUR,
         balance: 0,
     });
@@ -58,6 +59,19 @@ export default function CreateAccountModal({ isOpen, onClose, onSubmit }: Create
                             value={formData.account_id}
                             onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
                         />
+                    </div>
+
+                    <div>   
+                        <label className="mb-1 block text-sm font-medium text-gray-300">Account Type</label>
+                        <select
+                            required
+                            className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            value={formData.type}
+                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        >
+                            <option value="Default">Default</option>
+                            <option value="Manual">Manual</option>
+                        </select>
                     </div>
 
                     <div>

@@ -13,10 +13,20 @@ class AccountController extends Controller
     {
         $accounts = Account::where('user_id', auth()->id())->get();
 
+
+        
+        if (request()->wantsJson()) {
+            return response()->json([
+                'accounts' => $accounts
+            ]);
+        }
+
         return Inertia::render('accounts/index', [
             'accounts' => $accounts,
         ]);
     }
+
+
 
     public function store(Request $request)
     {
@@ -59,7 +69,6 @@ class AccountController extends Controller
 
     public function show($id)
     {
-
         $account = Account::all()->find($id);
 
         if (! $account) {
@@ -93,5 +102,21 @@ class AccountController extends Controller
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,
         ]);
+    }
+
+    public function destroy($id)
+    {
+     
+            $account = Account::where('user_id', auth()->id())->findOrFail($id);
+            
+            // Delete all associated transactions first
+            $account->transactions()->delete();
+            
+            // Delete the account
+            $account->delete();
+
+            return redirect()->route('accounts.index')
+                ->with('success', 'Account and all associated transactions have been deleted successfully');
+    
     }
 }

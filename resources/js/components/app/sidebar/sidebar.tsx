@@ -1,10 +1,11 @@
-import { BanknotesIcon, Cog6ToothIcon, CreditCardIcon, HomeIcon, TagIcon } from '@heroicons/react/24/outline';
+import { BanknotesIcon, Cog6ToothIcon, CreditCardIcon, HomeIcon, TagIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { Link } from '@inertiajs/react';
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Transactions', href: '/transactions', icon: BanknotesIcon },
     { name: 'Accounts', href: '/accounts', icon: CreditCardIcon },
+    { name: 'Imports', href: '/imports', icon: ArrowDownTrayIcon },
     { name: 'Rules', href: '/transaction-rules', icon: TagIcon },
     { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];

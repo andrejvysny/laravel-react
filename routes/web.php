@@ -3,6 +3,7 @@
 use App\Http\Controllers\Accounts\AccountController;
 use App\Http\Controllers\BankProviders\GoCardlessController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\Transactions\TransactionController;
 use App\Http\Controllers\Transactions\TransactionRuleController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
 
     Route::get('/accounts/{id}', [AccountController::class, 'show'])->name('accounts.show');
+    Route::delete('/accounts/{id}', [AccountController::class, 'destroy'])->name('accounts.destroy');
 
     // Transaction Rules
     Route::get('/transaction-rules', [TransactionRuleController::class, 'index'])->name('transaction-rules.index');
@@ -33,6 +35,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/transaction-rules/{rule}', [TransactionRuleController::class, 'update'])->name('transaction-rules.update');
     Route::delete('/transaction-rules/{rule}', [TransactionRuleController::class, 'destroy'])->name('transaction-rules.destroy');
     Route::post('/transaction-rules/reorder', [TransactionRuleController::class, 'reorder'])->name('transaction-rules.reorder');
+    
+    // Import Routes
+    Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
+    Route::post('/imports/upload', [ImportController::class, 'upload'])->name('imports.upload');
+    Route::post('/imports/{import}/configure', [ImportController::class, 'configure'])->name('imports.configure');
+    Route::post('/imports/{import}/process', [ImportController::class, 'process'])->name('imports.process');
+    Route::get('/imports/categories', [ImportController::class, 'getCategories'])->name('imports.categories');
 });
 
 // GoCardless routes

@@ -57,4 +57,12 @@ class User extends Authenticatable
             'gocardless_token_expires_at' => 'datetime',
         ];
     }
+
+    /**
+     * Get the accounts for the user.
+     */
+    public function accounts()
+    {
+        return $this->hasMany(\App\Models\Account::class);
+    }
 }

@@ -6,6 +6,7 @@ import { type NavItem } from '@/types/index';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Coins, LayoutGrid, PieChartIcon, TagIcon, Users } from 'lucide-react';
 import AppLogo from './app-logo';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 const mainNavItems: NavItem[] = [
     {
@@ -22,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Transactions',
         href: '/transactions',
         icon: Coins,
+    },
+    {
+        title: 'Imports',
+        href: '/imports',
+        icon: ArrowDownTrayIcon,
     },
     {
         title: 'Rules',

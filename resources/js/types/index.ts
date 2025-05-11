@@ -66,3 +66,34 @@ export interface BreadcrumbItem {
     href: string;
     title: string;
 }
+
+export interface Import {
+    id: number;
+    user_id: number;
+    filename: string;
+    original_filename: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    total_rows: number;
+    processed_rows: number;
+    failed_rows: number;
+    column_mapping: Record<string, number | null>;
+    date_format: string;
+    amount_format: string;
+    amount_type_strategy: string;
+    currency: string;
+    metadata: {
+        headers?: string[];
+        sample_rows?: string[][];
+    };
+    processed_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
+}

@@ -4,9 +4,20 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Account, Transaction } from '@/types/index';
 import { formatDate } from '@/utils/date';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import { useState } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
     account: Account;
@@ -16,6 +27,7 @@ interface Props {
 
 export default function Detail({ account, transactions, monthlySummaries }: Props) {
     const [syncing, setSyncing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const breadcrumbs = [
         { title: 'Accounts', href: '/accounts' },
         { title: account.name, href: `/accounts/${account.id}` },
@@ -31,6 +43,20 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
             // Handle error silently
         } finally {
             setSyncing(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            const response = await axios.delete(`/accounts/${account.id}`);
+            if (response.status === 200) {
+                window.location.href = '/accounts';
+            }
+        } catch (error) {
+            console.error('Failed to delete account:', error);
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -71,7 +97,9 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                     <div className="w-full max-w-xs flex-shrink-0">
                         <div className="sticky top-8">
                             <div className="mb-6 w-full rounded-xl bg-gray-900 p-6">
-                                <h2 className="mb-2 text-2xl font-semibold">{account.name}</h2>
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h2 className="text-2xl font-semibold">{account.name}</h2>
+                                </div>
                                 <div className="mb-2 text-gray-400">{account.bank_name}</div>
                                 <div className="flex flex-col gap-1 text-sm">
                                     <span>
@@ -90,6 +118,39 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                                         </span>
                                     </span>
                                 </div>
+
+                                <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="sm">
+                                                Delete Account
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete your account
+                                                    and all associated transactions. This includes:
+                                                </AlertDialogDescription>
+                                                <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
+                                                    <li>All transaction history</li>
+                                                    <li>All transaction categories</li>
+                                                    <li>All account settings</li>
+                                                    <li>All synced data</li>
+                                                </ul>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={handleDeleteAccount}
+                                                    disabled={isDeleting}
+                                                    className="bg-red-600 hover:bg-red-700"
+                                                >
+                                                    {isDeleting ? 'Deleting...' : 'Delete Account'}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                             </div>
 
                             {account.is_gocardless_synced && (
