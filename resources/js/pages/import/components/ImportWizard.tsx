@@ -23,6 +23,7 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
         headers: string[];
         sampleRows: string[][];
         accountId: number;
+        totalRows: number;
     } | null>(null);
     const [configuredData, setConfiguredData] = useState<{
         columnMapping: Record<string, number | null>;
@@ -57,7 +58,13 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
         setCurrentStep(step);
     };
 
-    const handleUploadComplete = useCallback((data: { importId: number; headers: string[]; sampleRows: string[][]; accountId: number }) => {
+    const handleUploadComplete = useCallback((data: {
+        importId: number;
+        headers: string[];
+        sampleRows: string[][];
+        accountId: number;
+        totalRows: number;
+    }) => {
         setUploadedData(data);
         setCurrentStep('configure');
     }, []);
@@ -144,11 +151,12 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
                 return (
                     <ConfirmStep
                         data={previewData}
-                        categoryMappings={categoryMappings}
+                        mappings={categoryMappings}
                         categories={categories}
                         onConfirm={handleProcessImport}
                         isLoading={isLoading}
                         error={error}
+                        totalRows={uploadedData?.totalRows || 0}
                     />
                 );
             default:

@@ -6,7 +6,13 @@ import { Input } from '@/components/ui/input';
 import axios from 'axios';
 
 interface UploadStepProps {
-    onComplete: (data: { importId: number; headers: string[]; sampleRows: string[][]; accountId: number }) => void;
+    onComplete: (data: { 
+        importId: number; 
+        headers: string[]; 
+        sampleRows: string[][]; 
+        accountId: number;
+        totalRows: number;
+    }) => void;
 }
 
 export default function UploadStep({ onComplete }: UploadStepProps) {
@@ -15,8 +21,8 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
     const [accounts, setAccounts] = useState<{ id: number; name: string }[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [delimiter, setDelimiter] = useState(',');
-    const [quoteChar, setQuoteChar] = useState('"');
+    const [delimiter, setDelimiter] = useState<string>(';');
+    const [quoteChar, setQuoteChar] = useState<string>('"');
 
     // Load accounts on component mount
     React.useEffect(() => {
@@ -42,10 +48,7 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !accountId) {
-            setError('Please select a file and account');
-            return;
-        }
+        if (!file || !accountId) return;
 
         setIsLoading(true);
         setError(null);
@@ -68,6 +71,7 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
                 headers: response.data.headers,
                 sampleRows: response.data.sample_rows,
                 accountId: parseInt(accountId),
+                totalRows: response.data.total_rows,
             });
         } catch (err: any) {
             console.error('Upload error:', err);

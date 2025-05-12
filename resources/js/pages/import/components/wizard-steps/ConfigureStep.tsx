@@ -90,7 +90,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
     const [saveMapping, setSaveMapping] = useState(false);
     const [mappingName, setMappingName] = useState('');
     const [bankName, setBankName] = useState('');
-    const [activeTab, setActiveTab] = useState('manual');
+    const [activeTab, setActiveTab] = useState('saved');
 
     // Load saved mappings on component mount
     useEffect(() => {
@@ -268,34 +268,6 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
         <div className="max-w-4xl mx-auto">
             <h3 className="text-xl font-semibold mb-4">Configure your import</h3>
 
-            {/* Sample Data */}
-            <div className="mb-8">
-                <h6 className="mb-4">Sample data from your uploaded CSV</h6>
-                <div className="rounded-lg border border-gray-700 overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-800 border-b border-gray-700">
-                            <tr>
-                                {headers.map((header, index) => (
-                                    <th key={index} className="px-4 py-2 text-left">
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sampleRows.slice(0, 5).map((row, rowIndex) => (
-                                <tr key={rowIndex} className="border-b border-gray-700">
-                                    {row.map((cell, cellIndex) => (
-                                        <td key={cellIndex} className="px-4 py-2 whitespace-nowrap truncate">
-                                            {cell}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
                 <TabsList className="mb-4">
@@ -497,6 +469,36 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 </TabsContent>
             </Tabs>
 
+
+{/* Sample Data */}
+<div className="mb-8">
+                <h6 className="mb-4">Sample data from your uploaded CSV</h6>
+                <div className="rounded-lg border border-gray-700 overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gray-800 border-b border-gray-700">
+                            <tr>
+                                {headers.map((header, index) => (
+                                    <th key={index} className="px-4 py-2 text-left">
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sampleRows.slice(0, 5).map((row, rowIndex) => (
+                                <tr key={rowIndex} className="border-b border-gray-700">
+                                    {row.map((cell, cellIndex) => (
+                                        <td key={cellIndex} className="px-4 py-2 whitespace-nowrap truncate">
+                                            {cell}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
             {error && (
                 <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md mb-6">
                     {error}

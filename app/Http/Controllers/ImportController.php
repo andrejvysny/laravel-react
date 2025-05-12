@@ -74,13 +74,16 @@ class ImportController extends Controller
             'rows_count' => count($sampleData['rows'])
         ]);
 
+        // Calculate total rows (excluding header)
+        $totalRows = count(file(Storage::path($path))) - 1;
+
         // Create import record
         $import = Import::create([
             'user_id' => Auth::id(),
             'filename' => $filename,
             'original_filename' => $originalFilename,
             'status' => Import::STATUS_PENDING,
-            'total_rows' => count(file(Storage::path($path))) - 1, // Exclude header
+            'total_rows' => $totalRows,
             'metadata' => [
                 'headers' => $sampleData['headers'],
                 'sample_rows' => $sampleData['rows'],
@@ -96,6 +99,7 @@ class ImportController extends Controller
             'import_id' => $import->id,
             'headers' => $sampleData['headers'],
             'sample_rows' => $sampleData['rows'],
+            'total_rows' => $totalRows,
         ]);
     }
 

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Category, Transaction } from '@/types/index';
 import { useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Loader2, FileText, CheckCircle2 } from 'lucide-react';
 
 interface ConfirmStepProps {
     data: Partial<Transaction>[];
@@ -12,6 +13,7 @@ interface ConfirmStepProps {
     onConfirm: () => void;
     isLoading: boolean;
     error: string | null;
+    totalRows: number;
 }
 
 // Extended transaction data that includes additional fields
@@ -32,12 +34,10 @@ export default function ConfirmStep({
     onConfirm,
     isLoading,
     error,
+    totalRows,
 }: ConfirmStepProps) {
     // Calculate statistics for the import summary
     const stats = useMemo(() => {
-        // Count total rows
-        const totalRows = data.length;
-        
         // Count unique values for each mapping type
         const uniqueValues: Record<MappingType, Set<string>> = {
             category: new Set<string>(),
@@ -51,7 +51,7 @@ export default function ConfirmStep({
             if (extendedItem.tag) uniqueValues.tag.add(extendedItem.tag);
             if (extendedItem.merchant) uniqueValues.merchant.add(extendedItem.merchant);
         });
-
+        
         // Count new vs existing for each mapping type
         const mappingStats = Object.entries(mappings || {}).reduce((acc, [type, typeMappings]) => {
             if (!typeMappings) return acc;
@@ -76,7 +76,7 @@ export default function ConfirmStep({
             income,
             mappings: mappingStats
         };
-    }, [data, mappings]);
+    }, [data, mappings, totalRows]);
 
     // Function to render mapping table for a specific type
     const renderMappingTable = (type: MappingType, typeMappings: Record<string, string> = {}, options: { id: number; name: string }[] = []) => {
@@ -130,8 +130,41 @@ export default function ConfirmStep({
                 </div>
             )}
             
+            {/* Loading overlay */}
+            {isLoading && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-gray-800 p-8 rounded-lg shadow-lg flex flex-col items-center gap-6 max-w-md w-full mx-4">
+                        <div className="flex items-center gap-4">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <h3 className="text-xl font-semibold text-white">Processing Import</h3>
+                        </div>
+                        
+                        <div className="w-full space-y-4">
+                            <div className="flex items-center gap-3 text-gray-300">
+                                <FileText className="h-5 w-5" />
+                                <span>Importing {totalRows} transactions...</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 text-gray-300">
+                                <CheckCircle2 className="h-5 w-5 text-green-400" />
+                                <span>Creating new categories, tags, and merchants...</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 text-gray-300">
+                                <CheckCircle2 className="h-5 w-5 text-green-400" />
+                                <span>Mapping relationships...</span>
+                            </div>
+                        </div>
+                        
+                        <p className="text-sm text-gray-400 mt-2">
+                            Please wait while we process your import. This may take a few moments.
+                        </p>
+                    </div>
+                </div>
+            )}
+            
             {/* Import Summary */}
-            <div className="rounded-lg border border-gray-700 p-6 mb-8">
+            <div className={`rounded-lg border border-gray-700 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <h4 className="text-lg font-medium mb-4">Import Summary</h4>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -179,7 +212,7 @@ export default function ConfirmStep({
             </div>
             
             {/* Sample Records */}
-            <div className="rounded-lg border border-gray-700 p-6 mb-8">
+            <div className={`rounded-lg border border-gray-700 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <h4 className="text-lg font-medium mb-4">Sample Records</h4>
                 <div className="overflow-x-auto">
                     <Table>
@@ -217,8 +250,16 @@ export default function ConfirmStep({
                 <Button
                     onClick={onConfirm}
                     disabled={isLoading}
+                    className="min-w-[150px]"
                 >
-                    {isLoading ? 'Processing...' : 'Confirm and Import'}
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                        </>
+                    ) : (
+                        'Confirm and Import'
+                    )}
                 </Button>
             </div>
         </div>
