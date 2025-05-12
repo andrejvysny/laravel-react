@@ -50,15 +50,18 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
     const handleDeleteAccount = async () => {
         setIsDeleting(true);
         try {
-            const response = await axios.delete(`/accounts/${account.id}`);
-            if (response.status === 200) {
-                window.location.href = '/accounts';
-            }
-        } catch (error) {
-            console.error('Failed to delete account:', error);
+            await router.delete(`/accounts/${account.id}`, {
+                onSuccess: () => {
+                    router.visit('/accounts');
+                },
+                onError: (error) => {
+                    console.error('Failed to delete account:', error);
+                }
+            });
         } finally {
             setIsDeleting(false);
         }
+    
     };
 
     // Group transactions by month and then by date

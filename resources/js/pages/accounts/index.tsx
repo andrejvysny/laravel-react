@@ -40,7 +40,9 @@ export default function Index({ accounts }: Props) {
                             },
                         ]}
                     />
-
+                    </div></div>
+<div className="mx-auto w-full max-w-7xl p-4">
+<div className="mx-auto w-full max-w-7xl">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {accounts.map((account) => (
                             <Link
