@@ -42,6 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/imports/{import}/configure', [ImportController::class, 'configure'])->name('imports.configure');
     Route::post('/imports/{import}/process', [ImportController::class, 'process'])->name('imports.process');
     Route::get('/imports/categories', [ImportController::class, 'getCategories'])->name('imports.categories');
+    Route::get('/imports/mappings', [ImportController::class, 'getSavedMappings'])->name('imports.mappings.get');
+    Route::post('/imports/mappings', [ImportController::class, 'saveMapping'])->name('imports.mappings.save');
+    Route::put('/imports/mappings/{mapping}', [ImportController::class, 'updateMappingUsage'])->name('imports.mappings.usage');
+    Route::delete('/imports/mappings/{mapping}', [ImportController::class, 'deleteMapping'])->name('imports.mappings.delete');
 });
 
 // GoCardless routes

@@ -4,8 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Transaction } from '@/types/index';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, Save, Trash2 } from 'lucide-react';
+import { Transaction, ImportMapping } from '@/types/index';
 import axios from 'axios';
 import { useState, useCallback, useEffect } from 'react';
 
@@ -80,19 +84,41 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
     const [error, setError] = useState<string | null>(null);
     const [previewData, setPreviewData] = useState<Partial<Transaction>[]>([]);
 
+
+    const [savedMappings, setSavedMappings] = useState<ImportMapping[]>([]);
+    const [selectedMapping, setSelectedMapping] = useState<string>('none');
+    const [saveMapping, setSaveMapping] = useState(false);
+    const [mappingName, setMappingName] = useState('');
+    const [bankName, setBankName] = useState('');
+    const [activeTab, setActiveTab] = useState('manual');
+
+    // Load saved mappings on component mount
+    useEffect(() => {
+        const fetchSavedMappings = async () => {
+            try {
+                const response = await axios.get('/imports/mappings');
+                setSavedMappings(response.data.mappings || []);
+            } catch (err) {
+                console.error('Failed to load saved mappings', err);
+            }
+        };
+
+        fetchSavedMappings();
+    }, []);
+
     // Auto-detect column mappings on initial render
     useEffect(() => {
         const initialMapping: Record<string, number | null> = {};
-        
+
         // Initialize all fields as null (not mapped)
         transactionFields.forEach(field => {
             initialMapping[field.key] = null;
         });
-        
+
         // Try to automatically map columns based on headers
         headers.forEach((header, index) => {
             const headerLower = header.toLowerCase();
-            
+
             // Match date fields
             if (headerLower.includes('date') || headerLower.includes('time')) {
                 initialMapping['booked_date'] = index;
@@ -130,7 +156,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 initialMapping['tags'] = index;
             }
         });
-        
+
         setColumnMapping(initialMapping);
     }, [headers]);
 
@@ -141,6 +167,44 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
             [field]: value ? parseInt(value) : null
         }));
     }, []);
+
+    // Handle saved mapping selection
+    const handleMappingSelect = useCallback((mappingId: string) => {
+        setSelectedMapping(mappingId);
+
+        if (mappingId !== 'none') {
+            const mapping = savedMappings.find(m => m.id.toString() === mappingId);
+            if (mapping) {
+                setColumnMapping(mapping.column_mapping);
+                setDateFormat(mapping.date_format);
+                setAmountFormat(mapping.amount_format);
+                setAmountTypeStrategy(mapping.amount_type_strategy);
+                setCurrency(mapping.currency);
+
+                // Update the usage timestamp
+                axios.put(`/imports/mappings/${mapping.id}`).catch(err => {
+                    console.error('Failed to update mapping usage', err);
+                });
+            }
+        }
+    }, [savedMappings]);
+
+    // Handle mapping deletion
+    const handleDeleteMapping = useCallback(async (mappingId: number, e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        if (confirm('Are you sure you want to delete this mapping?')) {
+            try {
+                await axios.delete(`/imports/mappings/${mappingId}`);
+                setSavedMappings(prev => prev.filter(m => m.id !== mappingId));
+                if (selectedMapping === mappingId.toString()) {
+                    setSelectedMapping('none');
+                }
+            } catch (err) {
+                console.error('Failed to delete mapping', err);
+            }
+        }
+    }, [selectedMapping]);
 
     // Submit configuration
     const handleSubmit = useCallback(async () => {
@@ -155,7 +219,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
 
         setIsLoading(true);
         setError(null);
-        
+
         try {
             const response = await axios.post(`/imports/${importId}/configure`, {
                 column_mapping: columnMapping,
@@ -164,9 +228,26 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 amount_type_strategy: amountTypeStrategy,
                 currency: currency,
             });
-            
+
             setPreviewData(response.data.preview_data || []);
-            
+
+            // Save mapping if requested
+            if (saveMapping && mappingName) {
+                try {
+                    await axios.post('/imports/mappings', {
+                        name: mappingName,
+                        bank_name: bankName,
+                        column_mapping: columnMapping,
+                        date_format: dateFormat,
+                        amount_format: amountFormat,
+                        amount_type_strategy: amountTypeStrategy,
+                        currency: currency,
+                    });
+                } catch (err: any) {
+                    console.error('Failed to save mapping', err);
+                }
+            }
+
             onComplete({
                 columnMapping,
                 dateFormat,
@@ -181,7 +262,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
         } finally {
             setIsLoading(false);
         }
-    }, [columnMapping, dateFormat, amountFormat, amountTypeStrategy, currency, importId, onComplete]);
+    }, [columnMapping, dateFormat, amountFormat, amountTypeStrategy, currency, importId, onComplete, saveMapping, mappingName, bankName]);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -189,7 +270,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
 
             {/* Sample Data */}
             <div className="mb-8">
-                <h6 className=" mb-4">Sample data from your uploaded CSV</h6>
+                <h6 className="mb-4">Sample data from your uploaded CSV</h6>
                 <div className="rounded-lg border border-gray-700 overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-800 border-b border-gray-700">
@@ -215,124 +296,221 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                     </table>
                 </div>
             </div>
-            
-            <p className="mb-6 text-gray-300">
-                Select the columns that correspond to each field in your CSV.
-            </p>
-            
-            {/* Column Mapping */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-                {transactionFields.map(field => (
-                    <div key={field.key} className="space-y-2">
-                        <Label className="flex items-center gap-1">
-                            {field.label}
-                            {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Select
-                            value={columnMapping[field.key]?.toString() ?? 'none'}
-                            onValueChange={(value) => handleColumnMappingChange(field.key, value === 'none' ? '' : value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select column" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">Select column</SelectItem>
-                                {headers.map((header, index) => (
-                                    <SelectItem key={index} value={index.toString()}>
-                                        {header}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                ))}
-            </div>
 
-            {/* Date and Amount Format */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="space-y-2">
-                    <Label>Date Format</Label>
-                    <Select value={dateFormat} onValueChange={setDateFormat}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select date format" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {dateFormats.map(format => (
-                                <SelectItem key={format.value} value={format.value}>
-                                    {format.label}
-                                </SelectItem>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+                <TabsList className="mb-4">
+                    <TabsTrigger value="saved">Use Saved Mapping</TabsTrigger>
+                    <TabsTrigger value="manual">Manual Configuration</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="saved">
+                    {savedMappings.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {savedMappings.map(mapping => (
+                                <Card
+                                    key={mapping.id}
+                                    className={`cursor-pointer ${selectedMapping === mapping.id.toString() ? 'border-primary' : 'border-gray-700'}`}
+                                    onClick={() => handleMappingSelect(mapping.id.toString())}
+                                >
+                                    <CardHeader className="p-4 flex flex-row items-center justify-between">
+                                        <div>
+                                            <CardTitle className="text-base">{mapping.name}</CardTitle>
+                                            {mapping.bank_name && (
+                                                <CardDescription>{mapping.bank_name}</CardDescription>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteMapping(mapping.id, e)}
+                                            className="text-gray-400 hover:text-red-500 transition"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </CardHeader>
+                                    <CardContent className="px-4 py-2 text-xs text-gray-400">
+                                        <div>Format: {mapping.date_format}, {mapping.amount_format}</div>
+                                        <div>Currency: {mapping.currency}</div>
+                                        <div>Last used: {new Date(mapping.last_used_at || '').toLocaleDateString()}</div>
+                                    </CardContent>
+                                </Card>
                             ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                
-                <div className="space-y-2">
-                    <Label>Amount Format</Label>
-                    <Select value={amountFormat} onValueChange={setAmountFormat}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select amount format" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {amountFormats.map(format => (
-                                <SelectItem key={format.value} value={format.value}>
-                                    {format.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-            
-            {/* Amount Type Strategy and Currency */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="space-y-2">
-                    <Label>Amount Type Strategy</Label>
-                    <Select value={amountTypeStrategy} onValueChange={setAmountTypeStrategy}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select amount type strategy" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {amountTypeStrategies.map(strategy => (
-                                <SelectItem key={strategy.value} value={strategy.value}>
-                                    {strategy.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                
-                <div className="space-y-2">
-                    <Label>Currency</Label>
-                    <Select value={currency} onValueChange={setCurrency}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select currency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {currencies.map(curr => (
-                                <SelectItem key={curr.value} value={curr.value}>
-                                    {curr.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-            
-            
+                        </div>
+                    ) : (
+                        <div className="text-center p-8 border border-dashed border-gray-700 rounded-md">
+                            <p className="text-gray-400">No saved mappings yet.</p>
+                            <p className="text-gray-400 mt-2">Configure manually and save for future use.</p>
+                        </div>
+                    )}
+
+                    {selectedMapping !== 'none' && (
+                        <div className="mt-6 flex justify-end">
+                            <Button onClick={() => setActiveTab('manual')}>
+                                Review Selected Mapping
+                            </Button>
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="manual">
+                    <p className="mb-6 text-gray-300">
+                        Select the columns that correspond to each field in your CSV.
+                    </p>
+
+                    {/* Column Mapping */}
+                    <div className="grid grid-cols-3 gap-6 mb-8">
+                        {transactionFields.map(field => (
+                            <div key={field.key} className="space-y-2">
+                                <Label className="flex items-center gap-1">
+                                    {field.label}
+                                    {field.required && <span className="text-red-500">*</span>}
+                                </Label>
+                                <Select
+                                    value={columnMapping[field.key]?.toString() ?? 'none'}
+                                    onValueChange={(value) => handleColumnMappingChange(field.key, value === 'none' ? '' : value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select column" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Select column</SelectItem>
+                                        {headers.map((header, index) => (
+                                            <SelectItem key={index} value={index.toString()}>
+                                                {header}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Date and Amount Format */}
+                    <div className="grid grid-cols-2 gap-6 mb-8">
+                        <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select value={dateFormat} onValueChange={setDateFormat}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select date format" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {dateFormats.map(format => (
+                                        <SelectItem key={format.value} value={format.value}>
+                                            {format.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Amount Format</Label>
+                            <Select value={amountFormat} onValueChange={setAmountFormat}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select amount format" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {amountFormats.map(format => (
+                                        <SelectItem key={format.value} value={format.value}>
+                                            {format.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* Amount Type Strategy and Currency */}
+                    <div className="grid grid-cols-2 gap-6 mb-8">
+                        <div className="space-y-2">
+                            <Label>Amount Type Strategy</Label>
+                            <Select value={amountTypeStrategy} onValueChange={setAmountTypeStrategy}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select amount type strategy" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {amountTypeStrategies.map(strategy => (
+                                        <SelectItem key={strategy.value} value={strategy.value}>
+                                            {strategy.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Currency</Label>
+                            <Select value={currency} onValueChange={setCurrency}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select currency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {currencies.map(curr => (
+                                        <SelectItem key={curr.value} value={curr.value}>
+                                            {curr.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* Save Mapping Option */}
+                    <div className="border border-gray-700 p-4 rounded-md mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="save-mapping"
+                                    checked={saveMapping}
+                                    onCheckedChange={setSaveMapping}
+                                />
+                                <Label htmlFor="save-mapping" className="cursor-pointer">
+                                    Save this configuration for future imports
+                                </Label>
+                            </div>
+                            <Save size={16} className="text-gray-400" />
+                        </div>
+
+                        {saveMapping && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="mapping-name">Mapping Name <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="mapping-name"
+                                        value={mappingName}
+                                        onChange={(e) => setMappingName(e.target.value)}
+                                        placeholder="e.g. My Bank Export"
+                                        className="border-gray-700"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="bank-name">Bank Name (optional)</Label>
+                                    <Input
+                                        id="bank-name"
+                                        value={bankName}
+                                        onChange={(e) => setBankName(e.target.value)}
+                                        placeholder="e.g. Chase Bank"
+                                        className="border-gray-700"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </TabsContent>
+            </Tabs>
+
             {error && (
                 <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md mb-6">
                     {error}
                 </div>
             )}
-            
+
             <div className="flex justify-end">
-                <Button 
+                <Button
                     onClick={handleSubmit}
-                    disabled={isLoading}
+                    disabled={isLoading || (activeTab === 'saved' && selectedMapping === 'none')}
                 >
                     {isLoading ? 'Processing...' : 'Apply configuration'}
                 </Button>
             </div>
         </div>
     );
-} 
+}

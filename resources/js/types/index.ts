@@ -34,6 +34,7 @@ export interface Transaction {
     partner: string;
     type: string;
     metadata: Record<string, any> | null;
+    import_data: Record<string, any> | null;
     balance_after_transaction: number;
     account_id: number;
     account?: Account;
@@ -94,6 +95,21 @@ export interface Category {
     id: number;
     name: string;
     user_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ImportMapping {
+    id: number;
+    user_id: number;
+    name: string;
+    bank_name: string | null;
+    column_mapping: Record<string, number | null>;
+    date_format: string;
+    amount_format: string;
+    amount_type_strategy: string;
+    currency: string;
+    last_used_at: string | null;
     created_at: string;
     updated_at: string;
 }

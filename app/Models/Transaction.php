@@ -24,6 +24,7 @@ class Transaction extends Model
         'metadata',
         'balance_after_transaction',
         'account_id',
+        'import_data',
     ];
 
     /**
@@ -37,6 +38,7 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'balance_after_transaction' => 'decimal:2',
         'metadata' => 'json',
+        'import_data' => 'json',
         'currency' => 'string',
         'type' => 'string',
     ];

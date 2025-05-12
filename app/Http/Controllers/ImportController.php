@@ -534,12 +534,21 @@ class ImportController extends Controller
         $data['transaction_id'] = 'IMP-' . Str::random(10);
         $data['currency'] = $currency;
         $data['account_id'] = $accountId;
-        $data['type'] = "Imported";
+        // Use type from mapping if provided, otherwise default to "Imported"
+        $data['type'] = $data['type'] ?? "Imported";
         $data['metadata'] = [
             'import_id' => $import->id,
             'imported_at' => now()->format('Y-m-d H:i:s')
         ];
         $data['balance_after_transaction'] = 0; // Placeholder, to be calculated later
+        // Map CSV row values to their headers for key:value structure
+        $importHeaders = $import->metadata['headers'] ?? [];
+        $importDataAssoc = [];
+        foreach ($row as $idx => $val) {
+            $header = $importHeaders[$idx] ?? "col_$idx";
+            $importDataAssoc[$header] = $val;
+        }
+        $data['import_data'] = json_encode($importDataAssoc, JSON_UNESCAPED_UNICODE); // Save original CSV row as JSON key:value
 
         // Set default values for required fields that might be missing
         if (!isset($data['processed_date'])) {
@@ -783,5 +792,108 @@ class ImportController extends Controller
             ]);
             return null;
         }
+    }
+
+    /**
+     * Get saved import mappings for the authenticated user
+     */
+    public function getSavedMappings()
+    {
+        Log::debug('Fetching saved import mappings for user', ['user_id' => Auth::id()]);
+
+        $mappings = \App\Models\ImportMapping::where('user_id', Auth::id())
+            ->orderByDesc('last_used_at')
+            ->get();
+
+        Log::debug('Found import mappings', ['count' => $mappings->count()]);
+
+        return response()->json([
+            'mappings' => $mappings,
+        ]);
+    }
+
+    /**
+     * Save a new import mapping
+     */
+    public function saveMapping(Request $request)
+    {
+        Log::debug('Saving new import mapping', ['user_id' => Auth::id()]);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'column_mapping' => 'required|array',
+            'date_format' => 'required|string',
+            'amount_format' => 'required|string',
+            'amount_type_strategy' => 'required|string',
+            'currency' => 'required|string|size:3',
+        ]);
+
+        $mapping = \App\Models\ImportMapping::create([
+            'user_id' => Auth::id(),
+            'name' => $request->name,
+            'bank_name' => $request->bank_name,
+            'column_mapping' => $request->column_mapping,
+            'date_format' => $request->date_format,
+            'amount_format' => $request->amount_format,
+            'amount_type_strategy' => $request->amount_type_strategy,
+            'currency' => $request->currency,
+            'last_used_at' => now(),
+        ]);
+
+        Log::debug('Import mapping saved successfully', ['mapping_id' => $mapping->id]);
+
+        return response()->json([
+            'message' => 'Import mapping saved successfully',
+            'mapping' => $mapping,
+        ]);
+    }
+
+    /**
+     * Update the last used timestamp for a mapping
+     */
+    public function updateMappingUsage(Request $request, \App\Models\ImportMapping $mapping)
+    {
+        // Check that this mapping belongs to the authenticated user
+        if ($mapping->user_id !== Auth::id()) {
+            Log::warning('Unauthorized mapping access attempt', [
+                'mapping_id' => $mapping->id,
+                'user_id' => Auth::id()
+            ]);
+            abort(403);
+        }
+
+        $mapping->last_used_at = now();
+        $mapping->save();
+
+        Log::debug('Updated mapping usage timestamp', ['mapping_id' => $mapping->id]);
+
+        return response()->json([
+            'message' => 'Mapping usage updated',
+            'mapping' => $mapping,
+        ]);
+    }
+
+    /**
+     * Delete a saved mapping
+     */
+    public function deleteMapping(\App\Models\ImportMapping $mapping)
+    {
+        // Check that this mapping belongs to the authenticated user
+        if ($mapping->user_id !== Auth::id()) {
+            Log::warning('Unauthorized mapping deletion attempt', [
+                'mapping_id' => $mapping->id,
+                'user_id' => Auth::id()
+            ]);
+            abort(403);
+        }
+
+        $mapping->delete();
+
+        Log::debug('Deleted import mapping', ['mapping_id' => $mapping->id]);
+
+        return response()->json([
+            'message' => 'Import mapping deleted successfully',
+        ]);
     }
 }

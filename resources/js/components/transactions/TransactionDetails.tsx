@@ -63,6 +63,26 @@ export default function TransactionDetails({ transaction }: Props) {
                     </div>
                 </div>
             )}
+            {transaction.import_data && (
+                <div className="mt-4 border-t border-gray-700 pt-4">
+                    <h4 className="mb-2 text-sm text-gray-400">Original Imported Data</h4>
+                    <div className="rounded-lg bg-gray-900 p-3">
+                        <pre className="text-sm whitespace-pre-wrap text-gray-300">
+                            {(() => {
+                                try {
+                                    // Try to parse if it's a JSON string, otherwise just show as string
+                                    const parsed = typeof transaction.import_data === 'string'
+                                        ? JSON.parse(transaction.import_data)
+                                        : transaction.import_data;
+                                    return JSON.stringify(parsed, null, 2);
+                                } catch {
+                                    return String(transaction.import_data);
+                                }
+                            })()}
+                        </pre>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

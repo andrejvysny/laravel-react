@@ -1,25 +1,34 @@
 import { Button } from '@/components/ui/button';
 import { Category, Transaction } from '@/types/index';
 import { useMemo } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ConfirmStepProps {
     data: Partial<Transaction>[];
-    categoryMappings: Record<string, string>;
+    mappings: Record<string, Record<string, string>>;
     categories: Category[];
+    tags?: { id: number; name: string }[];
+    merchants?: { id: number; name: string }[];
     onConfirm: () => void;
     isLoading: boolean;
     error: string | null;
 }
 
-// Extended transaction data that includes the category field not in the original Transaction type
+// Extended transaction data that includes additional fields
 interface ExtendedTransactionData extends Partial<Transaction> {
     category?: string;
+    tag?: string;
+    merchant?: string;
 }
+
+type MappingType = 'category' | 'tag' | 'merchant';
 
 export default function ConfirmStep({
     data,
-    categoryMappings,
+    mappings = { category: {}, tag: {}, merchant: {} },
     categories,
+    tags = [],
+    merchants = [],
     onConfirm,
     isLoading,
     error,
@@ -29,25 +38,33 @@ export default function ConfirmStep({
         // Count total rows
         const totalRows = data.length;
         
-        // Count unique categories
-        const uniqueCategories = new Set<string>();
+        // Count unique values for each mapping type
+        const uniqueValues: Record<MappingType, Set<string>> = {
+            category: new Set<string>(),
+            tag: new Set<string>(),
+            merchant: new Set<string>()
+        };
+
         data.forEach(item => {
             const extendedItem = item as ExtendedTransactionData;
-            if (extendedItem.category) {
-                uniqueCategories.add(extendedItem.category);
-            }
+            if (extendedItem.category) uniqueValues.category.add(extendedItem.category);
+            if (extendedItem.tag) uniqueValues.tag.add(extendedItem.tag);
+            if (extendedItem.merchant) uniqueValues.merchant.add(extendedItem.merchant);
         });
-        
-        // Count new vs existing categories
-        const newCategories = Array.from(uniqueCategories).filter(
-            cat => categoryMappings[cat] === 'new'
-        );
-        const existingCategories = Array.from(uniqueCategories).filter(
-            cat => categoryMappings[cat] !== 'new' && categoryMappings[cat] !== ''
-        );
-        const uncategorized = Array.from(uniqueCategories).filter(
-            cat => categoryMappings[cat] === ''
-        );
+
+        // Count new vs existing for each mapping type
+        const mappingStats = Object.entries(mappings || {}).reduce((acc, [type, typeMappings]) => {
+            if (!typeMappings) return acc;
+            
+            const values = Array.from(uniqueValues[type as MappingType] || new Set());
+            acc[type] = {
+                total: values.length,
+                new: values.filter(v => typeMappings[v] === 'new').length,
+                existing: values.filter(v => typeMappings[v] !== 'new' && typeMappings[v] !== 'unmapped').length,
+                unmapped: values.filter(v => typeMappings[v] === 'unmapped').length
+            };
+            return acc;
+        }, {} as Record<string, { total: number; new: number; existing: number; unmapped: number }>);
 
         // Count expenses vs income
         const expenses = data.filter(item => (item.amount || 0) < 0).length;
@@ -55,14 +72,49 @@ export default function ConfirmStep({
         
         return {
             totalRows,
-            uniqueCategoriesCount: uniqueCategories.size,
-            newCategoriesCount: newCategories.length,
-            existingCategoriesCount: existingCategories.length,
-            uncategorizedCount: uncategorized.length,
             expenses,
             income,
+            mappings: mappingStats
         };
-    }, [data, categoryMappings]);
+    }, [data, mappings]);
+
+    // Function to render mapping table for a specific type
+    const renderMappingTable = (type: MappingType, typeMappings: Record<string, string> = {}, options: { id: number; name: string }[] = []) => {
+        const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
+        const mappingEntries = Object.entries(typeMappings || {});
+
+        if (mappingEntries.length === 0) return null;
+
+        return (
+            <div className="mt-6">
+                <h5 className="font-medium mb-2">{typeTitle} Mappings</h5>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>From</TableHead>
+                            <TableHead>To</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {mappingEntries.map(([from, to]) => (
+                            <TableRow key={`${type}-${from}`}>
+                                <TableCell>{from}</TableCell>
+                                <TableCell>
+                                    {to === 'new' ? (
+                                        <span className="text-green-400">+ Create "{from}"</span>
+                                    ) : to === 'unmapped' ? (
+                                        <span className="text-gray-400">Unmapped</span>
+                                    ) : (
+                                        options.find(opt => opt.id.toString() === to)?.name || to
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        );
+    };
     
     return (
         <div className="max-w-3xl mx-auto">
@@ -98,85 +150,65 @@ export default function ConfirmStep({
                         </div>
                     </div>
                     
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Unique Categories:</span>
-                            <span className="font-medium">{stats.uniqueCategoriesCount}</span>
+                    {Object.entries(stats.mappings).map(([type, typeStats]) => (
+                        <div key={type} className="space-y-2">
+                            <div className="flex justify-between">
+                                <span className="text-gray-400">Unique {type.charAt(0).toUpperCase() + type.slice(1)}s:</span>
+                                <span className="font-medium">{typeStats.total}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-400">New {type}s:</span>
+                                <span className="font-medium">{typeStats.new}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-400">Mapped to Existing:</span>
+                                <span className="font-medium">{typeStats.existing}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-400">Unmapped:</span>
+                                <span className="font-medium">{typeStats.unmapped}</span>
+                            </div>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">New Categories:</span>
-                            <span className="font-medium">{stats.newCategoriesCount}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Mapped to Existing:</span>
-                            <span className="font-medium">{stats.existingCategoriesCount}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-400">Uncategorized:</span>
-                            <span className="font-medium">{stats.uncategorizedCount}</span>
-                        </div>
-                    </div>
+                    ))}
                 </div>
                 
-                {/* Category Mapping Summary */}
-                {stats.uniqueCategoriesCount > 0 && (
-                    <div className="mt-6">
-                        <h5 className="font-medium mb-2">Category Mappings</h5>
-                        <table className="w-full">
-                            <thead className="border-b border-gray-700">
-                                <tr>
-                                    <th className="py-2 text-left text-gray-400">From</th>
-                                    <th className="py-2 text-left text-gray-400">To</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.entries(categoryMappings).map(([from, to]) => (
-                                    <tr key={from} className="border-b border-gray-800">
-                                        <td className="py-2">{from}</td>
-                                        <td className="py-2">
-                                            {to === 'new' ? (
-                                                <span className="text-green-400">+ Create "{from}"</span>
-                                            ) : to === '' ? (
-                                                <span className="text-gray-400">Uncategorized</span>
-                                            ) : (
-                                                to
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                {/* Mapping Tables */}
+                {renderMappingTable('category', mappings?.category, categories)}
+                {renderMappingTable('tag', mappings?.tag, tags)}
+                {renderMappingTable('merchant', mappings?.merchant, merchants)}
             </div>
             
             {/* Sample Records */}
             <div className="rounded-lg border border-gray-700 p-6 mb-8">
                 <h4 className="text-lg font-medium mb-4">Sample Records</h4>
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b border-gray-700">
-                            <tr>
-                                <th className="px-4 py-2 text-left text-gray-400">Date</th>
-                                <th className="px-4 py-2 text-left text-gray-400">Amount</th>
-                                <th className="px-4 py-2 text-left text-gray-400">Description</th>
-                                <th className="px-4 py-2 text-left text-gray-400">Category</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Tag</TableHead>
+                                <TableHead>Merchant</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {data.slice(0, 5).map((item, index) => {
                                 const extendedItem = item as ExtendedTransactionData;
                                 return (
-                                    <tr key={index} className="border-b border-gray-800">
-                                        <td className="px-4 py-2">{item.booked_date}</td>
-                                        <td className="px-4 py-2">{item.amount}</td>
-                                        <td className="px-4 py-2">{item.description}</td>
-                                        <td className="px-4 py-2">{extendedItem.category}</td>
-                                    </tr>
+                                    <TableRow key={index}>
+                                        <TableCell>{item.booked_date}</TableCell>
+                                        <TableCell>{item.amount}</TableCell>
+                                        <TableCell>{item.description}</TableCell>
+                                        <TableCell>{extendedItem.category}</TableCell>
+                                        <TableCell>{extendedItem.tag}</TableCell>
+                                        <TableCell>{extendedItem.merchant}</TableCell>
+                                    </TableRow>
                                 );
                             })}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
             

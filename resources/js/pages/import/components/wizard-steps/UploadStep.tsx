@@ -1,53 +1,60 @@
+import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Account } from '@/types/index';
+import { Input } from '@/components/ui/input';
 import axios from 'axios';
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
 
 interface UploadStepProps {
     onComplete: (data: { importId: number; headers: string[]; sampleRows: string[][]; accountId: number }) => void;
 }
 
 export default function UploadStep({ onComplete }: UploadStepProps) {
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [selectedAccount, setSelectedAccount] = useState<number | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [accountId, setAccountId] = useState<string>('');
+    const [accounts, setAccounts] = useState<{ id: number; name: string }[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [delimiter, setDelimiter] = useState(',');
     const [quoteChar, setQuoteChar] = useState('"');
 
     // Load accounts on component mount
-    useState(() => {
+    React.useEffect(() => {
         axios.get('/accounts')
             .then(response => {
                 setAccounts(response.data.accounts);
+                if (response.data.accounts.length > 0) {
+                    setAccountId(response.data.accounts[0].id.toString());
+                }
             })
-            .catch(error => {
-                console.error('Failed to load accounts', error);
+            .catch(err => {
+                console.error('Failed to load accounts', err);
                 setError('Failed to load accounts');
             });
-    });
+    }, []);
 
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
-        if (!selectedAccount) {
-            setError('Please select an account first');
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+        }
+    }, []);
+
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!file || !accountId) {
+            setError('Please select a file and account');
             return;
         }
 
-        const file = acceptedFiles[0];
-        if (!file) return;
-
-        setIsUploading(true);
+        setIsLoading(true);
         setError(null);
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('account_id', selectedAccount.toString());
+        formData.append('account_id', accountId);
         formData.append('delimiter', delimiter);
-        formData.append('quote_char', quoteChar === 'none' ? '' : quoteChar);
+        formData.append('quote_char', quoteChar);
 
         try {
             const response = await axios.post('/imports/upload', formData, {
@@ -60,111 +67,133 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
                 importId: response.data.import_id,
                 headers: response.data.headers,
                 sampleRows: response.data.sample_rows,
-                accountId: selectedAccount,
+                accountId: parseInt(accountId),
             });
         } catch (err: any) {
+            console.error('Upload error:', err);
             setError(err.response?.data?.message || 'Failed to upload file');
         } finally {
-            setIsUploading(false);
+            setIsLoading(false);
         }
-    }, [selectedAccount, delimiter, quoteChar, onComplete]);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
-        accept: {
-            'text/csv': ['.csv'],
-            'text/plain': ['.txt'],
-        },
-        maxFiles: 1,
-        disabled: isUploading || !selectedAccount,
-    });
+    }, [file, accountId, delimiter, quoteChar, onComplete]);
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Upload CSV File</h2>
+        <div className="max-w-xl mx-auto">
+            <h3 className="text-xl font-semibold mb-4">Upload your transaction data</h3>
+            <p className="mb-6 text-gray-300">
+                Upload a CSV file containing your transaction data. We'll help you map the columns to fields in our system.
+            </p>
 
-            {/* Account Selection */}
-            <div className="mb-6">
-                <Label htmlFor="account">Select Account</Label>
-                <Select
-                    value={selectedAccount?.toString()}
-                    onValueChange={(value) => setSelectedAccount(parseInt(value))}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select an account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {accounts.map((account) => (
-                            <SelectItem key={account.id} value={account.id.toString()}>
-                                {account.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* CSV Format Options */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <Label htmlFor="delimiter">Delimiter</Label>
-                    <Select
-                        value={delimiter}
-                        onValueChange={setDelimiter}
-                    >
+                {/* Account Selection */}
+                <div className="space-y-2">
+                    <Label htmlFor="account">Account</Label>
+                    <Select value={accountId} onValueChange={setAccountId}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select delimiter" />
+                            <SelectValue placeholder="Select an account" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value=",">, (comma)</SelectItem>
-                            <SelectItem value=";">; (semicolon)</SelectItem>
-                            <SelectItem value="\t">Tab</SelectItem>
-                            <SelectItem value="|">| (pipe)</SelectItem>
+                            {accounts.map(account => (
+                                <SelectItem key={account.id} value={account.id.toString()}>
+                                    {account.name}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
-                <div>
-                    <Label htmlFor="quoteChar">Quote Character</Label>
-                    <Select
-                        value={quoteChar}
-                        onValueChange={setQuoteChar}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select quote character" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="none">No quotes</SelectItem>
-                            <SelectItem value='"'>" (double quote)</SelectItem>
-                            <SelectItem value="'">' (single quote)</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
 
-            {/* File Upload Area */}
-            <div
-                {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-                    ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-                    ${(!selectedAccount || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-                <input {...getInputProps()} />
-                {isUploading ? (
-                    <p>Uploading...</p>
-                ) : isDragActive ? (
-                    <p>Drop the file here...</p>
-                ) : (
-                    <div>
-                        <p className="mb-2">Drag and drop a CSV file here, or click to select a file</p>
-                        <p className="text-sm text-gray-500">Supported formats: CSV, TXT</p>
+                {/* CSV Options */}
+                <div className="space-y-4">
+                    <h4 className="font-medium">CSV Options</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="delimiter">Delimiter</Label>
+                            <Select value={delimiter} onValueChange={setDelimiter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select delimiter" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value=",">Comma (,)</SelectItem>
+                                    <SelectItem value=";">Semicolon (;)</SelectItem>
+                                    <SelectItem value="\t">Tab</SelectItem>
+                                    <SelectItem value="|">Pipe (|)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="quote-char">Quote Character</Label>
+                            <Select value={quoteChar} onValueChange={setQuoteChar}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select quote character" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value='"'>Double quote (")</SelectItem>
+                                    <SelectItem value="'">Single quote (')</SelectItem>
+                                    <SelectItem value="none">None</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* File Upload */}
+                <div className="space-y-2">
+                    <Label htmlFor="file">CSV File</Label>
+                    <div className="border border-dashed border-gray-700 rounded-md p-6 text-center">
+                        <Input
+                            id="file"
+                            type="file"
+                            accept=".csv,.txt"
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            {file ? (
+                                <div className="text-green-500 font-medium">{file.name}</div>
+                            ) : (
+                                <>
+                                    <div className="text-gray-400">Drag & drop your file here, or</div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => document.getElementById('file')?.click()}
+                                    >
+                                        Browse Files
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    {file && (
+                        <div className="flex justify-end">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setFile(null)}
+                                className="text-gray-400 hover:text-red-500"
+                            >
+                                Remove file
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
+
+                {error && (
+                    <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md">
+                        {error}
                     </div>
                 )}
-            </div>
 
-            {error && (
-                <div className="mt-4 text-red-500">
-                    {error}
+                <div className="flex justify-end">
+                    <Button type="submit" disabled={isLoading || !file || !accountId}>
+                        {isLoading ? 'Uploading...' : 'Continue to Configure'}
+                    </Button>
                 </div>
-            )}
+            </form>
         </div>
     );
-} 
+}

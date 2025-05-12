@@ -44,23 +44,29 @@ function TransactionList({ transactions, monthlySummaries }: Props) {
                     return new Date(b).getTime() - new Date(a).getTime();
                 });
                 return (
-                    <div key={month} className="border-accent mb-10 flex flex-col gap-2 border-b-1 pb-10">
+                    <div key={month} className="mb-10 flex flex-col gap-2 pb-10">
                         {/* Summary at the top of the month */}
-                        <div className="mb-4 flex items-center gap-4 rounded-xl bg-gray-900 p-4">
-                            <div className="flex-1">
-                                <div className="font-medium">{month}</div>
-                                <div className="mt-1 flex gap-4">
-                                    <span className="text-sm text-gray-400">
-                                        Income: <span className="text-green-500">+{summary.income.toFixed(2)}€</span>
+                        <div className="mb-1 flex items-center">
+                            <span className="font-medium text-2xl">{month}</span>
+                        </div>
+                        <div className="mb-4 flex rounded-xl bg-gray-900 ">
+                            <div className="flex w-full divide-x divide-gray-400 p-4">
+                                <div className="flex-1 flex flex-col items-start pr-6">
+                                    <span className="mb-1 text-xs text-gray-400">Income</span>
+                                    <span className="text-xl font-medium text-green-500">
+                                        +{summary.income.toFixed(2)}€
                                     </span>
-                                    <span className="text-sm text-gray-400">
-                                        Expense: <span className="text-red-500">-{summary.expense.toFixed(2)}€</span>
+                                </div>
+                                <div className="flex-1 flex flex-col items-start px-6">
+                                    <span className="mb-1 text-xs text-gray-400">Expense</span>
+                                    <span className="text-xl font-medium text-red-500">
+                                        -{summary.expense.toFixed(2)}€
                                     </span>
-                                    <span className="text-sm text-gray-400">
-                                        Balance:{' '}
-                                        <span className={summary.balance >= 0 ? 'text-green-500' : 'text-red-500'}>
-                                            {summary.balance.toFixed(2)}€
-                                        </span>
+                                </div>
+                                <div className="flex-1 flex flex-col items-start pl-6">
+                                    <span className="mb-1 text-xs text-gray-400">Balance</span>
+                                    <span className={`text-xl font-medium ${summary.balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                        {summary.balance.toFixed(2)}€
                                     </span>
                                 </div>
                             </div>
