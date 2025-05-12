@@ -40,14 +40,14 @@ const mainNavItems: NavItem[] = [
         icon: ShoppingBag,
     },
     {
-        title: 'Imports',
-        href: '/imports',
-        icon: ArrowDownTrayIcon,
-    },
-    {
         title: 'Rules',
         href: '/transaction-rules',
         icon: TagIcon,
+    },
+    {
+        title: 'Imports',
+        href: '/imports',
+        icon: ArrowDownTrayIcon,
     },
     {
         title: 'Analytics',

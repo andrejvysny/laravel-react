@@ -15,7 +15,7 @@ class TransactionRuleController extends Controller
             ->orderBy('order')
             ->get();
 
-        return Inertia::render('TransactionRules/Index', [
+        return Inertia::render('rules/index', [
             'rules' => $rules,
         ]);
     }
