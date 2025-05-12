@@ -11,7 +11,7 @@ export default function TransactionDetails({ transaction }: Props) {
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <p className="text-sm text-muted-foreground">Amount</p>
-                    <p className={`font-medium ${transaction.amount < 0 ? 'text-destructive' : 'text-green-500'}`}>
+                    <p className={`font-medium ${transaction.amount < 0 ? 'text-destructive-foreground' : 'text-green-500'}`}>
                         {Number(transaction.amount).toFixed(2)} {transaction.currency}
                     </p>
                 </div>

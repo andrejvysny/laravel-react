@@ -9,7 +9,7 @@ export default function Transaction(transaction: TransactionType) {
     return (
         <div className="flex flex-col">
             <div
-                className="mx-auto w-full max-w-xl  rounded-xl bg-card border-1 shadow-xs hover:border-black p-2 transition-colors"
+                className="mx-auto w-full max-w-xl  rounded-xl bg-card border-1 shadow-xs hover:border-current p-2 transition-colors"
             >
 
                 <div className="flex items-center gap-4  w-full cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
@@ -42,7 +42,7 @@ export default function Transaction(transaction: TransactionType) {
                         </div>
                     </div>
                     {transaction.amount < 0 ? (
-                        <div className="text-lg text-destructive font-semibold">
+                        <div className="text-lg text-destructive-foreground font-semibold">
                             ▼ {Number(transaction.amount).toFixed(2)} {transaction.currency}
                         </div>
                     ) : (

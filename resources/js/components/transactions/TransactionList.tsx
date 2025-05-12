@@ -49,23 +49,23 @@ function TransactionList({ transactions, monthlySummaries }: Props) {
                         <div className="mb-1 flex items-center">
                             <span className="font-semibold text-2xl">{month}</span>
                         </div>
-                        <div className="mb-4 flex rounded-xl bg-card shadow xs border-1 border-black">
+                        <div className="mb-4 flex rounded-xl bg-card shadow xs border-1 border-current">
                             <div className="flex w-full divide-x divide-gray-400 p-4">
                                 <div className="flex-1 flex flex-col items-start pr-6">
                                     <span className="mb-1 text-xs text-gray-400">Income</span>
-                                    <span className="text-xl font-semibold text-green-500">
+                                    <span className="text-xl font-medium">
                                         +{summary.income.toFixed(2)}€
                                     </span>
                                 </div>
                                 <div className="flex-1 flex flex-col items-start px-6">
                                     <span className="mb-1 text-xs text-gray-400">Expense</span>
-                                    <span className="text-xl font-semibold text-destructive">
+                                    <span className="text-xl font-medium">
                                         -{summary.expense.toFixed(2)}€
                                     </span>
                                 </div>
                                 <div className="flex-1 flex flex-col items-start pl-6">
                                     <span className="mb-1 text-xs text-gray-400">Balance</span>
-                                    <span className={`text-xl font-bold ${summary.balance >= 0 ? 'text-green-500' : 'text-destructive'}`}>
+                                    <span className={`text-xl font-bold ${summary.balance >= 0 ? 'text-green-500' : 'text-destructive-foreground'}`}>
                                         {summary.balance.toFixed(2)}€
                                     </span>
                                 </div>
