@@ -277,30 +277,38 @@ class ImportController extends Controller
 
             $processed = 0;
             $failed = 0;
+            $skipped = 0;
 
             // Read each line and process
             while (($line = $this->safelyGetCSVLine($file, $delimiter, $quoteChar)) !== false) {
                 try {
                     // Skip null lines or empty arrays
                     if ($line === null || (is_array($line) && count($line) === 0)) {
-                        Log::warning('Skipping empty line', ['row_number' => $processed + $failed + 1]);
+                        Log::warning('Skipping empty line', ['row_number' => $processed + $failed + $skipped + 1]);
                         continue;
                     }
 
-                    $this->processImportRow($line, $import, $accountId);
-                    $processed++;
+                    $result = $this->processImportRow($line, $import, $accountId);
+                    
+                    // Check if the transaction was skipped (duplicate)
+                    if ($result === 'skipped') {
+                        $skipped++;
+                    } else {
+                        $processed++;
+                    }
 
-                    if ($processed % 100 === 0) {
+                    if (($processed + $skipped) % 100 === 0) {
                         Log::debug('Processing progress', [
                             'processed' => $processed,
-                            'failed' => $failed
+                            'failed' => $failed,
+                            'skipped' => $skipped
                         ]);
                     }
                 } catch (\Exception $e) {
                     $failed++;
                     Log::error('Failed to process row', [
                         'error' => $e->getMessage(),
-                        'row_number' => $processed + $failed,
+                        'row_number' => $processed + $failed + $skipped,
                         'line' => $line ?? 'null'
                     ]);
                 }
@@ -308,22 +316,37 @@ class ImportController extends Controller
 
             fclose($file);
 
-            // Update import status
+            // Update import status and metadata
             $import->processed_rows = $processed;
             $import->failed_rows = $failed;
-            $import->status = Import::STATUS_COMPLETED;
+            $import->status = $skipped > 0 ? Import::STATUS_COMPLETED_SKIPPED_DUPLICATES : Import::STATUS_COMPLETED;
             $import->processed_at = now();
+            
+            // Add skipped transactions to metadata
+            $metadata = $import->metadata ?? [];
+            $metadata['skipped_rows'] = $skipped;
+            $import->metadata = $metadata;
+            
             $import->save();
 
             Log::info('Import completed successfully', [
                 'import_id' => $import->id,
                 'processed' => $processed,
-                'failed' => $failed
+                'failed' => $failed,
+                'skipped' => $skipped,
+                'status' => $import->status
             ]);
 
             return response()->json([
-                'message' => 'Import processed successfully',
+                'message' => $skipped > 0 
+                    ? 'Import completed with some duplicate transactions skipped'
+                    : 'Import processed successfully',
                 'import' => $import,
+                'stats' => [
+                    'processed' => $processed,
+                    'failed' => $failed,
+                    'skipped' => $skipped
+                ]
             ]);
         } catch (\Exception $e) {
             Log::error('Import failed', [
@@ -460,6 +483,52 @@ class ImportController extends Controller
     }
 
     /**
+     * Check if a transaction already exists in the database
+     */
+    private function isDuplicateTransaction(array $data, $accountId): bool
+    {
+        Log::debug('Checking for duplicate transaction', [
+            'account_id' => $accountId,
+            'data' => $data
+        ]);
+
+        // Get the booked date and create a date range for comparison
+        $bookedDate = \DateTime::createFromFormat('Y-m-d H:i:s', $data['booked_date']);
+        if (!$bookedDate) {
+            return false;
+        }
+
+        // Create a date range of ±1 day to account for slight variations
+        $startDate = (clone $bookedDate)->modify('-1 day')->format('Y-m-d H:i:s');
+        $endDate = (clone $bookedDate)->modify('+1 day')->format('Y-m-d H:i:s');
+
+        // Build the query to check for duplicates
+        $query = Transaction::where('account_id', $accountId)
+            ->where('amount', $data['amount'])
+            ->where('currency', $data['currency'])
+            ->where('partner', $data['partner'])
+            ->whereBetween('booked_date', [$startDate, $endDate]);
+
+        // Add description to the check if it exists
+        if (!empty($data['description'])) {
+            $query->where('description', $data['description']);
+        }
+
+        // Add target/source IBAN to the check if they exist
+        if (!empty($data['target_iban'])) {
+            $query->where('target_iban', $data['target_iban']);
+        }
+        if (!empty($data['source_iban'])) {
+            $query->where('source_iban', $data['source_iban']);
+        }
+
+        $exists = $query->exists();
+        Log::debug('Duplicate check result', ['is_duplicate' => $exists]);
+
+        return $exists;
+    }
+
+    /**
      * Process a CSV row into a transaction
      */
     private function processImportRow(array $row, Import $import, $accountId)
@@ -572,12 +641,22 @@ class ImportController extends Controller
             Log::debug('Setting default description', ['value' => $data['description']]);
         }
 
+        // Check for duplicate transaction
+        if ($this->isDuplicateTransaction($data, $accountId)) {
+            Log::info('Skipping duplicate transaction', [
+                'account_id' => $accountId,
+                'data' => $data
+            ]);
+            return 'skipped';
+        }
+
         Log::debug('Creating transaction', ['data' => json_encode($data)]);
 
         // Create transaction
         try {
             Transaction::create($data);
             Log::debug('Transaction created successfully');
+            return 'processed';
         } catch (\Exception $e) {
             Log::error('Failed to create transaction', [
                 'error' => $e->getMessage(),

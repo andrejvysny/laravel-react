@@ -50,6 +50,7 @@ class Import extends Model
     public const STATUS_PROCESSING = 'processing';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_FAILED = 'failed';
+    public const STATUS_COMPLETED_SKIPPED_DUPLICATES = 'completed_skipped_duplicates';
     
     /**
      * Get the user that owns the import.
