@@ -87,7 +87,7 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                 {/* Top widgets row */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     {/* Accounts List Widget */}
-                    <div className="rounded-xl bg-gray-900 p-6">
+                    <div className="rounded-xl bg-card shadow-xs border-1 p-6">
                         <div className="mb-2 text-sm text-gray-400">Accounts</div>
                         <ul>
                             {accounts.slice(0, 5).map((acc) => (
@@ -104,19 +104,19 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                         {accounts.length > 5 && <div className="mt-2 text-xs text-gray-500">+{accounts.length - 5} more accounts</div>}
                     </div>
                     {/* Total Balance Widget */}
-                    <div className="flex flex-col items-center justify-center rounded-xl bg-gray-900 p-6">
+                    <div className="flex flex-col items-center justify-center rounded-xl bg-card shadow-xs border-1 p-6">
                         <span className="mb-2 text-sm text-gray-400">Total Balance</span>
                         <span className="text-3xl font-bold text-green-400">{totalBalance.toFixed(2)} €</span>
                     </div>
                     {/* Recent Transactions Count Widget */}
-                    <div className="flex flex-col items-center justify-center rounded-xl bg-gray-900 p-6">
+                    <div className="flex flex-col items-center justify-center rounded-xl bg-card shadow-xs border-1 p-6">
                         <span className="mb-2 text-sm text-gray-400">Recent Transactions</span>
                         <span className="text-3xl font-bold text-blue-400">{recentTransactions.length}</span>
                     </div>
                 </div>
 
                 {/* Balance Chart */}
-                <div className="rounded-xl bg-gray-900 p-6">
+                <div className="rounded-xl bg-card shadow-xs border-1 p-6">
                     <h3 className="mb-4 text-lg font-semibold text-white">Balance Over Time</h3>
                     <div className="h-64">
                         <Line data={chartData} options={chartOptions} />
@@ -124,7 +124,7 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                 </div>
 
                 {/* Recent Transactions Table */}
-                <div className="mt-4 rounded-xl bg-gray-900 p-6">
+                <div className="mt-4 rounded-xl bg-card shadow-xs border-1 p-6">
                     <h3 className="mb-4 text-lg font-semibold text-white">Latest Transactions</h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-sm">

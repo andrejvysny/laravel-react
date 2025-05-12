@@ -5,22 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Merchant extends Model
+class Tag extends Model
 {
-    /** @use HasFactory<\Database\Factories\MerchantFactory> */
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'description',
-        'logo',
+        'color',
         'user_id',
     ];
 
     /**
-     * Get the user that owns the merchant.
+     * Get the user that owns the tag.
      */
     public function user(): BelongsTo
     {
@@ -28,10 +26,10 @@ class Merchant extends Model
     }
 
     /**
-     * Get the transactions for this merchant.
+     * Get the transactions for the tag.
      */
-    public function transactions(): HasMany
+    public function transactions(): BelongsToMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->belongsToMany(Transaction::class);
     }
-}
+} 

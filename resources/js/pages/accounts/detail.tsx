@@ -18,6 +18,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import ValueSplit from '@/components/ui/value-split';
 
 interface Props {
     account: Account;
@@ -91,92 +92,84 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Account: ${account.name}`} />
+
             <div className="mx-auto w-full max-w-7xl p-4">
                 <div className="mx-auto flex w-full max-w-5xl gap-6">
                     {/* Left: Sticky Account Details, Settings, Analytics */}
                     <div className="w-full max-w-xs flex-shrink-0">
                         <div className="sticky top-8">
-                            <div className="mb-6 w-full rounded-xl bg-gray-900 p-6">
-                                <div className="mb-4 flex items-center justify-between">
-                                    <h2 className="text-2xl font-semibold">{account.name}</h2>
-                                </div>
-                                <div className="mb-2 text-gray-400">{account.bank_name}</div>
-                                <div className="flex flex-col gap-1 text-sm">
-                                    <span>
-                                        <span className="text-gray-400">IBAN:</span> {account.iban}
-                                    </span>
-                                    <span>
-                                        <span className="text-gray-400">Type:</span> {account.type}
-                                    </span>
-                                    <span>
-                                        <span className="text-gray-400">Currency:</span> {account.currency}
-                                    </span>
-                                    <span>
-                                        <span className="text-gray-400">Balance:</span>{' '}
-                                        <span className="font-bold text-white">
-                                            {Number(account.balance).toFixed(2)} {account.currency}
-                                        </span>
-                                    </span>
-                                </div>
+                            <div className="bg-card mb-6 w-full rounded-xl border-1 p-6 shadow-xs">
+                                <h2 className="text-xl font-semibold">{account.name}</h2>
+                                <div className="mb-4 font-bold text-muted-foreground">{account.bank_name}</div>
+
+                                <ValueSplit
+                                    className="mb-4"
+                                    data={[
+                                        { label: 'IBAN', value: account.iban },
+                                        { label: 'Type', value: account.type },
+                                        { label: 'Currency', value: account.currency },
+                                        { label: 'Balance', value: Number(account.balance).toFixed(2) },
+                                    ]}
+                                />
 
                                 <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="sm">
-                                                Delete Account
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete your account
-                                                    and all associated transactions. This includes:
-                                                </AlertDialogDescription>
-                                                <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" className="w-full">
+                                            Delete Account
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete your account and all associated
+                                                transactions. This includes:
+                                                <ul className="list-disc pl-5 text-sm">
                                                     <li>All transaction history</li>
                                                     <li>All transaction categories</li>
                                                     <li>All account settings</li>
                                                     <li>All synced data</li>
                                                 </ul>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction
-                                                    onClick={handleDeleteAccount}
-                                                    disabled={isDeleting}
-                                                    className="bg-red-600 hover:bg-red-700"
-                                                >
-                                                    {isDeleting ? 'Deleting...' : 'Delete Account'}
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={handleDeleteAccount}
+                                                disabled={isDeleting}
+                                                className="bg-red-600 hover:bg-red-700"
+                                            >
+                                                {isDeleting ? 'Deleting...' : 'Delete Account'}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
 
                             {account.is_gocardless_synced && (
-                                <div className="mb-6 w-full rounded-xl bg-gray-900 p-6">
+                                <div className="bg-card mb-6 w-full rounded-xl border-1 p-6 shadow-xs">
                                     <h3 className="mb-4 text-lg font-semibold">GoCardless</h3>
-                                    <div>
-                                        <span className="text-gray-400">Bank: </span> {account.bank_name}
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">Account ID: </span> {account.gocardless_account_id}
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">Synced: </span>
-                                        {account.gocardless_last_synced_at ? formatDate(account.gocardless_last_synced_at) : 'Never'}
-                                    </div>
-                                    <div className="mt-4">
-                                        <Button onClick={handleSyncTransactions} disabled={syncing} className="w-full">
-                                            {syncing ? 'Syncing...' : 'Sync Transactions'}
-                                        </Button>
-                                    </div>
+                                    <ValueSplit
+                                        className="mb-4"
+                                        data={[
+                                            { label: 'Bank', value: account.bank_name },
+                                            { label: 'Account ID', value: account.gocardless_account_id },
+                                            {
+                                                label: 'Synced',
+                                                value: account.gocardless_last_synced_at ? formatDate(account.gocardless_last_synced_at) : 'Never',
+                                            },
+                                        ]}
+                                    />
+
+                                    <Button onClick={handleSyncTransactions} disabled={syncing} className="w-full">
+                                        {syncing ? 'Syncing...' : 'Sync Transactions'}
+                                    </Button>
                                 </div>
                             )}
                             {/* Analytics/Graphs Placeholder */}
-                            <div className="mb-6 w-full rounded-xl bg-gray-900 p-6">
+                            <div className="bg-card shadow-xs border-1 mb-6 w-full rounded-xl p-6">
                                 <h3 className="mb-4 text-lg font-semibold">Category spending</h3>
-                                <div className="flex h-32 items-center justify-center text-gray-500">
+                                <div className="flex h-32 items-center justify-center text-muted-foreground">
                                     {/* Replace with real chart component */}
                                     <span>coming soon…</span>
                                 </div>
@@ -186,7 +179,7 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                     {/* Right: Transactions List */}
                     <div className="flex-1">
                         <div className="mb-6 flex flex-col">
-                            <div className="rounded-xl bg-gray-900 p-6">
+                            <div className="bg-card shadow-xs border-1 rounded-xl p-5">
                                 <h3 className="mb-4 text-lg font-semibold">Monthly comparison</h3>
 
                                 <AccountDetailMonthlyComparisonChart

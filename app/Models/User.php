@@ -65,4 +65,28 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Account::class);
     }
+
+    /**
+     * Get the categories for the user.
+     */
+    public function categories()
+    {
+        return $this->hasMany(\App\Models\Category::class);
+    }
+
+    /**
+     * Get the merchants for the user.
+     */
+    public function merchants()
+    {
+        return $this->hasMany(\App\Models\Merchant::class);
+    }
+
+    /**
+     * Get the tags for the user.
+     */
+    public function tags()
+    {
+        return $this->hasMany(\App\Models\Tag::class);
+    }
 }

@@ -3,15 +3,24 @@
 namespace App\Http\Controllers\Transactions;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Merchant;
+use App\Models\Tag;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::with('account')
+        $transactions = Transaction::with([
+                'account', 
+                'merchant', 
+                'category', 
+                'tags'
+            ])
             ->orderBy('booked_date', 'desc')
             ->get();
 
@@ -34,9 +43,17 @@ class TransactionController extends Controller
             $monthlySummaries[$month]['balance'] += $transaction->amount;
         }
 
+        // Get categories, merchants, and tags for the filter dropdowns
+        $categories = Auth::user()->categories;
+        $merchants = Auth::user()->merchants;
+        $tags = Auth::user()->tags;
+
         return Inertia::render('transactions/index', [
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,
+            'categories' => $categories,
+            'merchants' => $merchants,
+            'tags' => $tags,
         ]);
     }
 
@@ -57,15 +74,53 @@ class TransactionController extends Controller
                 'metadata' => 'nullable|array',
                 'balance_after_transaction' => 'required|numeric',
                 'account_id' => 'required|exists:accounts,id',
+                'merchant_id' => 'nullable|exists:merchants,id',
+                'category_id' => 'nullable|exists:categories,id',
+                'tags' => 'nullable|array',
+                'tags.*' => 'exists:tags,id',
             ]);
 
+            $tagIds = $validated['tags'] ?? [];
+            unset($validated['tags']);
+
             $transaction = Transaction::create($validated);
+            
+            if (!empty($tagIds)) {
+                $transaction->tags()->attach($tagIds);
+            }
 
             return redirect()->back()->with('success', 'Transaction created successfully');
         } catch (\Exception $e) {
             \Log::error('Transaction creation failed: '.$e->getMessage());
 
             return redirect()->back()->with('error', 'Failed to create transaction: '.$e->getMessage());
+        }
+    }
+
+    public function update(Request $request, Transaction $transaction)
+    {
+        try {
+            $validated = $request->validate([
+                'merchant_id' => 'nullable|exists:merchants,id',
+                'category_id' => 'nullable|exists:categories,id',
+                'tags' => 'nullable|array',
+                'tags.*' => 'exists:tags,id',
+            ]);
+
+            $tagIds = $validated['tags'] ?? [];
+            unset($validated['tags']);
+
+            $transaction->update($validated);
+            
+            if (isset($request->tags)) {
+                $transaction->tags()->sync($tagIds);
+            }
+
+            return redirect()->back()->with('success', 'Transaction updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Transaction update failed: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to update transaction: '.$e->getMessage());
         }
     }
 }

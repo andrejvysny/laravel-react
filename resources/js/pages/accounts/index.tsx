@@ -4,6 +4,9 @@ import AppLayout from '@/layouts/app-layout';
 import { Account } from '@/types/index';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import PageHeader from '@/layouts/page-header';
+import ValueSplit from '@/components/ui/value-split';
 
 interface Props {
     accounts: Account[];
@@ -26,52 +29,40 @@ export default function Index({ accounts }: Props) {
             <Head title="Your accounts" />
             <div className="mx-auto w-full max-w-7xl p-4">
                 <div className="mx-auto w-full max-w-7xl">
-                    <div className="mb-6 flex items-center justify-between">
-                        <h1 className="text-2xl font-semibold text-white">Your accounts</h1>
-
-                        <div>
-                            <button
-                                onClick={() => setIsCreateModalOpen(true)}
-                                className="mr-3 cursor-pointer rounded-md bg-white px-3 py-1 text-black"
-                            >
-                                + New Account
-                            </button>
-                            <button
-                                onClick={() => setIsImportWizardOpen(true)}
-                                className="mr-3 cursor-pointer rounded-md bg-white px-3 py-1 text-black"
-                            >
-                                Import Account
-                            </button>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title="Accounts"
+                        buttons={[{
+                                onClick: () => setIsCreateModalOpen(true),
+                                label: '+ New Account',
+                            },{
+                                onClick: () => setIsImportWizardOpen(true),
+                                label: 'Import Account',
+                            },
+                        ]}
+                    />
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {accounts.map((account) => (
                             <Link
                                 key={account.id}
                                 href={`/accounts/${account.id}`}
-                                className="block cursor-pointer rounded-lg bg-gray-900 p-6 transition-colors hover:bg-gray-700"
+                                className="bg-card block cursor-pointer rounded-lg border-1 p-6 shadow-xs transition-colors hover:border-current"
                             >
                                 <div className="mb-4 flex items-start justify-between">
                                     <div>
-                                        <h3 className="text-lg font-medium text-white">{account.name}</h3>
-                                        <p className="text-sm text-gray-400">{account.bank_name}</p>
+                                        <h3 className="text-lg font-medium">{account.name}</h3>
+                                        <p className="text-sm">{account.bank_name}</p>
                                     </div>
-                                    <span className="text-sm text-gray-400">{account.currency}</span>
+                                    <span className="text-sm">{account.currency}</span>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-400">IBAN</span>
-                                        <span className="text-white">{account.iban}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-400">Balance</span>
-                                        <span className="text-white">
-                                            {Number(account.balance).toFixed(2)} {account.currency}
-                                        </span>
-                                    </div>
-                                </div>
+                                <ValueSplit data={
+                                    [
+                                        { label: 'IBAN', value: account.iban },
+                                        { label: 'Balance', value: Number(account.balance).toFixed(2) },
+                                    ]
+                                } />
+
                             </Link>
                         ))}
                     </div>

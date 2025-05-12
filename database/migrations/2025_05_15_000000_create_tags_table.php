@@ -11,15 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('tags', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->text('description')->nullable();
             $table->string('color', 7)->nullable();
-            $table->string('icon')->nullable();
-            $table->foreignId('parent_category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->timestamps();
+        });
+
+        Schema::create('tag_transaction', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['transaction_id', 'tag_id']);
         });
     }
 
@@ -28,6 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('tag_transaction');
+        Schema::dropIfExists('tags');
     }
-};
+}; 

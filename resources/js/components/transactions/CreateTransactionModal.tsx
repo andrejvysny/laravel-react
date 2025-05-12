@@ -1,5 +1,9 @@
 import { Transaction } from '@/types/index';
-import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { z } from 'zod';
+import { SmartForm, InferFormValues } from '@/components/ui/smart-form';
+import { TextInput, SelectInput } from '@/components/ui/form-inputs';
 
 interface CreateTransactionModalProps {
     isOpen: boolean;
@@ -7,128 +11,152 @@ interface CreateTransactionModalProps {
     onSubmit: (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'account'>) => void;
 }
 
+const transactionSchema = z.object({
+    transaction_id: z.string().min(1, { message: 'Transaction ID is required' }),
+    amount: z.coerce.number().min(0.01, { message: 'Amount must be greater than 0' }),
+    currency: z.string().min(1, { message: 'Currency is required' }),
+    booked_date: z.string().min(1, { message: 'Booked date is required' }),
+    processed_date: z.string().min(1, { message: 'Processed date is required' }),
+    description: z.string().min(1, { message: 'Description is required' }),
+    target_iban: z.string().nullable(),
+    source_iban: z.string().nullable(),
+    partner: z.string().min(1, { message: 'Partner is required' }),
+    type: z.enum(['TRANSFER', 'DEPOSIT', 'WITHDRAWAL', 'PAYMENT'], {
+        required_error: 'Type is required',
+    }),
+    metadata: z.record(z.any()).nullable(),
+    balance_after_transaction: z.coerce.number(),
+    account_id: z.number(),
+    import_data: z.record(z.any()).nullable(),
+});
+
+type FormValues = InferFormValues<typeof transactionSchema>;
+
+const transactionTypes = [
+    { value: 'TRANSFER', label: 'Transfer' },
+    { value: 'DEPOSIT', label: 'Deposit' },
+    { value: 'WITHDRAWAL', label: 'Withdrawal' },
+    { value: 'PAYMENT', label: 'Payment' },
+];
+
+const currencies = [
+    { value: 'EUR', label: 'Euro (€)' },
+    { value: 'USD', label: 'US Dollar ($)' },
+    { value: 'GBP', label: 'British Pound (£)' },
+];
+
 export default function CreateTransactionModal({ isOpen, onClose, onSubmit }: CreateTransactionModalProps) {
-    const [formData, setFormData] = useState({
+    const defaultValues: FormValues = {
         transaction_id: `TRX-${Date.now()}`,
-        amount: '',
+        amount: 0,
         currency: 'EUR',
-        booked_date: new Date().toISOString(),
-        processed_date: new Date().toISOString(),
+        booked_date: new Date().toISOString().split('T')[0],
+        processed_date: new Date().toISOString().split('T')[0],
         description: '',
-        target_iban: null as string | null,
-        source_iban: null as string | null,
+        target_iban: null,
+        source_iban: null,
         partner: '',
         type: 'PAYMENT',
         metadata: null,
         balance_after_transaction: 0,
         account_id: 1,
-    });
+        import_data: null,
+    };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (values: FormValues) => {
         onSubmit({
-            ...formData,
-            amount: parseFloat(formData.amount),
-            balance_after_transaction: parseFloat(formData.amount),
+            ...values,
+            balance_after_transaction: values.amount, // Set initial balance to amount
         });
         onClose();
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div
-            className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
-            onClick={(e) => e.target === e.currentTarget && onClose()}
-        >
-            <div className="w-full max-w-md rounded-xl bg-gray-900 p-6">
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-xl font-bold">New Transaction</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        ✕
-                    </button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>New Transaction</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details to create a new transaction.
+                    </DialogDescription>
+                </DialogHeader>
+                <SmartForm
+                    schema={transactionSchema}
+                    defaultValues={defaultValues}
+                    onSubmit={handleSubmit}
+                    formProps={{ className: 'space-y-4' }}
+                >
+                    {() => (
+                        <>
+                            <TextInput<FormValues>
+                                name="partner"
+                                label="Partner"
+                                required
+                            />
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Partner</label>
-                        <input
-                            type="text"
-                            value={formData.partner}
-                            onChange={(e) => setFormData({ ...formData, partner: e.target.value })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                            required
-                        />
-                    </div>
+                            <TextInput<FormValues>
+                                name="amount"
+                                label="Amount"
+                                type="number"
+                                required
+                            />
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Amount</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={formData.amount}
-                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                            required
-                        />
-                    </div>
+                            <SelectInput<FormValues>
+                                name="currency"
+                                label="Currency"
+                                options={currencies}
+                                required
+                            />
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Description</label>
-                        <input
-                            type="text"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                            required
-                        />
-                    </div>
+                            <TextInput<FormValues>
+                                name="description"
+                                label="Description"
+                                required
+                            />
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Type</label>
-                        <select
-                            value={formData.type}
-                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                            required
-                        >
-                            <option value="TRANSFER">Transfer</option>
-                            <option value="DEPOSIT">Deposit</option>
-                            <option value="WITHDRAWAL">Withdrawal</option>
-                            <option value="PAYMENT">Payment</option>
-                        </select>
-                    </div>
+                            <SelectInput<FormValues>
+                                name="type"
+                                label="Type"
+                                options={transactionTypes}
+                                required
+                            />
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Target IBAN</label>
-                        <input
-                            type="text"
-                            value={formData.target_iban || ''}
-                            onChange={(e) => setFormData({ ...formData, target_iban: e.target.value || null })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                        />
-                    </div>
+                            <TextInput<FormValues>
+                                name="target_iban"
+                                label="Target IBAN"
+                            />
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-400">Source IBAN</label>
-                        <input
-                            type="text"
-                            value={formData.source_iban || ''}
-                            onChange={(e) => setFormData({ ...formData, source_iban: e.target.value || null })}
-                            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-white focus:border-gray-600 focus:outline-none"
-                        />
-                    </div>
+                            <TextInput<FormValues>
+                                name="source_iban"
+                                label="Source IBAN"
+                            />
 
-                    <div className="mt-6 flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white">
-                            Cancel
-                        </button>
-                        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-                            Create Transaction
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                            <TextInput<FormValues>
+                                name="booked_date"
+                                label="Booked Date"
+                                type="date"
+                                required
+                            />
+
+                            <TextInput<FormValues>
+                                name="processed_date"
+                                label="Processed Date"
+                                type="date"
+                                required
+                            />
+
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={onClose}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit">
+                                    Create Transaction
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    )}
+                </SmartForm>
+            </DialogContent>
+        </Dialog>
     );
 }
