@@ -165,7 +165,7 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-gray-900 text-white overflow-hidden">
+        <div className="fixed inset-0 z-50 flex flex-col bg-background text-white overflow-hidden">
             {/* Header */}
             <div className="absolute top-0 right-0 p-5">
                 <Button variant="ghost" onClick={onCancel}>
@@ -245,21 +245,21 @@ interface StepIndicatorProps {
 
 function StepIndicator({ number, title, isActive, isCompleted, onClick }: StepIndicatorProps) {
     const bgColor = isActive
-        ? 'bg-white text-black'
+        ? 'bg-foreground text-current font-semibold'
         : isCompleted
-            ? 'bg-green-500 text-white'
-            : ' text-gray-300 border border-gray-600';
+            ? 'bg-green-500 text-current font-semibold'
+            : ' text-foreground border font-semibold border-foreground';
 
     return (
         <div className="flex flex-col items-center cursor-pointer" onClick={onClick}>
             <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bgColor}`}>
                 {isCompleted ? '✓' : number}
             </div>
-            <div className="mt-2 text-sm">{title}</div>
+            <div className="mt-2 text-sm text-foreground">{title}</div>
         </div>
     );
 }
 
 function StepDivider({ isActive }: { isActive: boolean }) {
-    return <div className={`h-1 w-12 ${isActive ? 'bg-green-500' : 'bg-gray-700'}`} />;
-} 
+    return <div className={`h-1 w-12 ${isActive ? 'bg-green-500' : 'bg-foreground'}`} />;
+}

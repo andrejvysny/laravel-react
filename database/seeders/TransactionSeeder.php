@@ -45,7 +45,7 @@ class TransactionSeeder extends Seeder
         $salaryTx = Transaction::create([
             'transaction_id' => 'SAL-' . uniqid(),
             'amount' => 5000.00,
-            'currency' => 'USD',
+            'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth(),
             'processed_date' => Carbon::now()->startOfMonth(),
             'description' => 'Monthly Salary',
@@ -61,7 +61,7 @@ class TransactionSeeder extends Seeder
         $rentTx = Transaction::create([
             'transaction_id' => 'RENT-' . uniqid(),
             'amount' => -1500.00,
-            'currency' => 'USD',
+            'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth()->addDays(2),
             'processed_date' => Carbon::now()->startOfMonth()->addDays(2),
             'description' => 'Monthly Rent',
@@ -77,7 +77,7 @@ class TransactionSeeder extends Seeder
         $utilTx = Transaction::create([
             'transaction_id' => 'UTIL-' . uniqid(),
             'amount' => -200.00,
-            'currency' => 'USD',
+            'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth()->addDays(5),
             'processed_date' => Carbon::now()->startOfMonth()->addDays(5),
             'description' => 'Monthly Utilities',
@@ -94,7 +94,7 @@ class TransactionSeeder extends Seeder
             $grocTx = Transaction::create([
                 'transaction_id' => 'GROC-' . uniqid(),
                 'amount' => -150.00,
-                'currency' => 'USD',
+                'currency' => 'EUR',
                 'booked_date' => Carbon::now()->startOfMonth()->addDays(rand(7, 25)),
                 'processed_date' => Carbon::now()->startOfMonth()->addDays(rand(7, 25)),
                 'description' => 'Grocery Shopping',
@@ -115,7 +115,7 @@ class TransactionSeeder extends Seeder
             $restTx = Transaction::create([
                 'transaction_id' => 'FOOD-' . uniqid(),
                 'amount' => $amount,
-                'currency' => 'USD',
+                'currency' => 'EUR',
                 'booked_date' => Carbon::now()->startOfMonth()->addDays(rand(1, 28)),
                 'processed_date' => Carbon::now()->startOfMonth()->addDays(rand(1, 28)),
                 'description' => 'Restaurant Visit',
@@ -126,6 +126,106 @@ class TransactionSeeder extends Seeder
                 'balance_after_transaction' => $creditBalance,
             ]);
             $restTx->tags()->attach($personalTag->id);
+        }
+
+        // Get additional categories
+        $transportCategory = Category::where('name', 'Transportation')->where('user_id', $user->id)->first();
+        $publicTransportCategory = Category::where('name', 'Public Transport')->where('user_id', $user->id)->first();
+        $fuelCategory = Category::where('name', 'Fuel')->where('user_id', $user->id)->first();
+        $entertainmentCategory = Category::where('name', 'Entertainment')->where('user_id', $user->id)->first();
+        $moviesCategory = Category::where('name', 'Movies')->where('user_id', $user->id)->first();
+        $gamesCategory = Category::where('name', 'Games')->where('user_id', $user->id)->first();
+
+        // Create transportation transactions for 3 months
+        for ($month = 0; $month < 3; $month++) {
+            // Public transport transactions
+            for ($i = 0; $i < 8; $i++) {
+                $creditBalance -= 5.50;
+                $transportTx = Transaction::create([
+                    'transaction_id' => 'PT-' . uniqid(),
+                    'amount' => -5.50,
+                    'currency' => 'EUR',
+                    'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                    'processed_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                    'description' => 'Bus Fare',
+                    'type' => Transaction::TYPE_CARD_PAYMENT,
+                    'account_id' => $creditCard->id,
+                    'category_id' => $publicTransportCategory->id,
+                    'balance_after_transaction' => $creditBalance,
+                ]);
+                $transportTx->tags()->attach($personalTag->id);
+            }
+
+            // Fuel transactions
+            $creditBalance -= 65.00;
+            $fuelTx = Transaction::create([
+                'transaction_id' => 'FUEL-' . uniqid(),
+                'amount' => -65.00,
+                'currency' => 'EUR',
+                'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                'processed_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                'description' => 'Gas Station',
+                'type' => Transaction::TYPE_CARD_PAYMENT,
+                'account_id' => $creditCard->id,
+                'category_id' => $fuelCategory->id,
+                'balance_after_transaction' => $creditBalance,
+            ]);
+            $fuelTx->tags()->attach($personalTag->id);
+        }
+
+        // Create entertainment transactions for 3 months
+        for ($month = 0; $month < 3; $month++) {
+            // Movie tickets
+            for ($i = 0; $i < 2; $i++) {
+                $creditBalance -= 15.00;
+                $movieTx = Transaction::create([
+                    'transaction_id' => 'MOV-' . uniqid(),
+                    'amount' => -15.00,
+                    'currency' => 'EUR',
+                    'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                    'processed_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                    'description' => 'Movie Theater',
+                    'type' => Transaction::TYPE_CARD_PAYMENT,
+                    'account_id' => $creditCard->id,
+                    'category_id' => $moviesCategory->id,
+                    'balance_after_transaction' => $creditBalance,
+                ]);
+                $movieTx->tags()->attach($personalTag->id);
+            }
+
+            // Gaming expenses
+            $creditBalance -= 29.99;
+            $gameTx = Transaction::create([
+                'transaction_id' => 'GAME-' . uniqid(),
+                'amount' => -29.99,
+                'currency' => 'EUR',
+                'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                'processed_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
+                'description' => 'Gaming Subscription',
+                'type' => Transaction::TYPE_CARD_PAYMENT,
+                'account_id' => $creditCard->id,
+                'category_id' => $gamesCategory->id,
+                'balance_after_transaction' => $creditBalance,
+            ]);
+            $gameTx->tags()->attach($personalTag->id);
+        }
+
+        // Add recurring salary for previous months
+        for ($month = 1; $month <= 3; $month++) {
+            $checkingBalance += 5000.00;
+            $salaryTx = Transaction::create([
+                'transaction_id' => 'SAL-' . uniqid(),
+                'amount' => 5000.00,
+                'currency' => 'EUR',
+                'booked_date' => Carbon::now()->subMonths($month)->startOfMonth(),
+                'processed_date' => Carbon::now()->subMonths($month)->startOfMonth(),
+                'description' => 'Monthly Salary',
+                'type' => Transaction::TYPE_DEPOSIT,
+                'account_id' => $checkingAccount->id,
+                'category_id' => $salaryCategory->id,
+                'balance_after_transaction' => $checkingBalance,
+            ]);
+            $salaryTx->tags()->attach($recurringTag->id);
         }
     }
 } 

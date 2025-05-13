@@ -29,7 +29,7 @@ export default function MapStep({ data, categories, tags = [], merchants = [], o
         tag: {},
         merchant: {}
     });
-    
+
     const [uniqueValues, setUniqueValues] = useState<Record<MappingType, string[]>>({
         category: [],
         tag: [],
@@ -46,19 +46,19 @@ export default function MapStep({ data, categories, tags = [], merchants = [], o
 
         data.forEach(item => {
             const importedData = item as ImportedData;
-            
+
             // Extract categories
             if (importedData.category && typeof importedData.category === 'string' && importedData.category.trim()) {
                 values.category.add(importedData.category.trim());
             } else if (importedData.type && typeof importedData.type === 'string' && importedData.type.trim()) {
                 values.category.add(importedData.type.trim());
             }
-            
+
             // Extract tags
             if (importedData.tag && typeof importedData.tag === 'string' && importedData.tag.trim()) {
                 values.tag.add(importedData.tag.trim());
             }
-            
+
             // Extract merchants
             if (importedData.merchant && typeof importedData.merchant === 'string' && importedData.merchant.trim()) {
                 values.merchant.add(importedData.merchant.trim());
@@ -97,19 +97,19 @@ export default function MapStep({ data, categories, tags = [], merchants = [], o
         const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
 
         return (
-            <div className="mb-8">
-                <h4 className="text-lg font-medium mb-3">Map {typeTitle}s</h4>
+            <div className="mb-8 text-foreground">
+                <h4 className="text-lg font-medium mb-3 text-foreground">Map {typeTitle}s</h4>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-1/3">Source {typeTitle}</TableHead>
-                            <TableHead className="w-2/3">Target {typeTitle}</TableHead>
+                            <TableHead className="w-1/3 text-foreground">Source {typeTitle}</TableHead>
+                            <TableHead className="w-2/3 text-foreground">Target {typeTitle}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {values.map(value => (
                             <TableRow key={`${type}-${value}`}>
-                                <TableCell className="font-medium text-gray-300">{value}</TableCell>
+                                <TableCell className="font-medium text-muted-foreground">{value}</TableCell>
                                 <TableCell>
                                     <Select
                                         value={mappings[type][value] || 'unmapped'}
@@ -138,9 +138,9 @@ export default function MapStep({ data, categories, tags = [], merchants = [], o
     };
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto text-foreground">
             <h3 className="text-xl font-semibold mb-4">Map Imported Fields</h3>
-            <p className="mb-6 text-gray-300">
+            <p className="mb-6">
                 Map the values from your import file to your existing categories, tags, and merchants.
             </p>
 

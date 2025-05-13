@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import axios from 'axios';
 
 interface UploadStepProps {
-    onComplete: (data: { 
-        importId: number; 
-        headers: string[]; 
-        sampleRows: string[][]; 
+    onComplete: (data: {
+        importId: number;
+        headers: string[];
+        sampleRows: string[][];
         accountId: number;
         totalRows: number;
     }) => void;
@@ -83,12 +83,12 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
 
     return (
         <div className="max-w-xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4">Upload your transaction data</h3>
-            <p className="mb-6 text-gray-300">
+            <h3 className="text-xl text-foreground font-semibold mb-4">Upload your transaction data</h3>
+            <p className="mb-6 text-foreground">
                 Upload a CSV file containing your transaction data. We'll help you map the columns to fields in our system.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 text-foreground bg-card p-6 rounded-lg shadow-md">
 
                 {/* Account Selection */}
                 <div className="space-y-2">

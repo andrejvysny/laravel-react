@@ -51,11 +51,11 @@ export default function ConfirmStep({
             if (extendedItem.tag) uniqueValues.tag.add(extendedItem.tag);
             if (extendedItem.merchant) uniqueValues.merchant.add(extendedItem.merchant);
         });
-        
+
         // Count new vs existing for each mapping type
         const mappingStats = Object.entries(mappings || {}).reduce((acc, [type, typeMappings]) => {
             if (!typeMappings) return acc;
-            
+
             const values = Array.from(uniqueValues[type as MappingType] || new Set());
             acc[type] = {
                 total: values.length,
@@ -69,7 +69,7 @@ export default function ConfirmStep({
         // Count expenses vs income
         const expenses = data.filter(item => (item.amount || 0) < 0).length;
         const income = data.filter(item => (item.amount || 0) >= 0).length;
-        
+
         return {
             totalRows,
             expenses,
@@ -87,7 +87,7 @@ export default function ConfirmStep({
 
         return (
             <div className="mt-6">
-                <h5 className="font-medium mb-2">{typeTitle} Mappings</h5>
+                <h5 className="font-medium mb-2 text-foreground">{typeTitle} Mappings</h5>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -103,7 +103,7 @@ export default function ConfirmStep({
                                     {to === 'new' ? (
                                         <span className="text-green-400">+ Create "{from}"</span>
                                     ) : to === 'unmapped' ? (
-                                        <span className="text-gray-400">Unmapped</span>
+                                        <span className="text-foreground">Unmapped</span>
                                     ) : (
                                         options.find(opt => opt.id.toString() === to)?.name || to
                                     )}
@@ -115,107 +115,107 @@ export default function ConfirmStep({
             </div>
         );
     };
-    
+
     return (
         <div className="max-w-3xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4">Confirm Import</h3>
-            <p className="mb-6 text-gray-300">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Confirm Import</h3>
+            <p className="mb-6 text-muted-foreground">
                 Please review the summary below and confirm to process the import.
             </p>
-            
+
             {/* Error message */}
             {error && (
-                <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md mb-6">
+                <div className="bg-red-900/20 border border-red-800 text-destructive-foreground p-3 rounded-md mb-6">
                     {error}
                 </div>
             )}
-            
+
             {/* Loading overlay */}
             {isLoading && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-                    <div className="bg-gray-800 p-8 rounded-lg shadow-lg flex flex-col items-center gap-6 max-w-md w-full mx-4">
+                    <div className="bg-card p-8 rounded-lg shadow-md flex flex-col items-center gap-6 max-w-md w-full mx-4">
                         <div className="flex items-center gap-4">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <h3 className="text-xl font-semibold text-white">Processing Import</h3>
+                            <h3 className="text-xl font-semibold text-foreground">Processing Import</h3>
                         </div>
-                        
+
                         <div className="w-full space-y-4">
-                            <div className="flex items-center gap-3 text-gray-300">
+                            <div className="flex items-center gap-3 text-foreground">
                                 <FileText className="h-5 w-5" />
                                 <span>Importing {totalRows} transactions...</span>
                             </div>
-                            
-                            <div className="flex items-center gap-3 text-gray-300">
+
+                            <div className="flex items-center gap-3 text-foreground">
                                 <CheckCircle2 className="h-5 w-5 text-green-400" />
                                 <span>Creating new categories, tags, and merchants...</span>
                             </div>
-                            
-                            <div className="flex items-center gap-3 text-gray-300">
+
+                            <div className="flex items-center gap-3 text-foreground">
                                 <CheckCircle2 className="h-5 w-5 text-green-400" />
                                 <span>Mapping relationships...</span>
                             </div>
                         </div>
-                        
-                        <p className="text-sm text-gray-400 mt-2">
+
+                        <p className="text-sm text-muted-foreground mt-2">
                             Please wait while we process your import. This may take a few moments.
                         </p>
                     </div>
                 </div>
             )}
-            
+
             {/* Import Summary */}
-            <div className={`rounded-lg border border-gray-700 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h4 className="text-lg font-medium mb-4">Import Summary</h4>
-                
+            <div className={`rounded-lg border border-foreground p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <h4 className="text-lg font-medium mb-4 text-foreground">Import Summary</h4>
+
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between">
-                            <span className="text-gray-400">Total Rows:</span>
-                            <span className="font-medium">{stats.totalRows}</span>
+                            <span className="text-muted-foreground">Total Rows:</span>
+                            <span className="font-medium text-foreground">{stats.totalRows}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-400">Expense Transactions:</span>
-                            <span className="font-medium">{stats.expenses}</span>
+                            <span className="text-muted-foreground">Expense Transactions:</span>
+                            <span className="font-medium text-foreground">{stats.expenses}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-400">Income Transactions:</span>
-                            <span className="font-medium">{stats.income}</span>
+                            <span className="text-muted-foreground">Income Transactions:</span>
+                            <span className="font-medium text-foreground">{stats.income}</span>
                         </div>
                     </div>
-                    
+
                     {Object.entries(stats.mappings).map(([type, typeStats]) => (
                         <div key={type} className="space-y-2">
                             <div className="flex justify-between">
-                                <span className="text-gray-400">Unique {type.charAt(0).toUpperCase() + type.slice(1)}s:</span>
-                                <span className="font-medium">{typeStats.total}</span>
+                                <span className="text-muted-foreground">Unique {type.charAt(0).toUpperCase() + type.slice(1)}s:</span>
+                                <span className="font-medium text-foreground">{typeStats.total}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-400">New {type}s:</span>
-                                <span className="font-medium">{typeStats.new}</span>
+                                <span className="text-muted-foreground">New {type}s:</span>
+                                <span className="font-medium text-foreground">{typeStats.new}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-400">Mapped to Existing:</span>
-                                <span className="font-medium">{typeStats.existing}</span>
+                                <span className="text-muted-foreground">Mapped to Existing:</span>
+                                <span className="font-medium text-foreground">{typeStats.existing}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-400">Unmapped:</span>
-                                <span className="font-medium">{typeStats.unmapped}</span>
+                                <span className="text-muted-foreground">Unmapped:</span>
+                                <span className="font-medium text-foreground">{typeStats.unmapped}</span>
                             </div>
                         </div>
                     ))}
                 </div>
-                
+
                 {/* Mapping Tables */}
                 {renderMappingTable('category', mappings?.category, categories)}
                 {renderMappingTable('tag', mappings?.tag, tags)}
                 {renderMappingTable('merchant', mappings?.merchant, merchants)}
             </div>
-            
+
             {/* Sample Records */}
-            <div className={`rounded-lg border border-gray-700 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h4 className="text-lg font-medium mb-4">Sample Records</h4>
+            <div className={`rounded-lg border border-1 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <h4 className="text-lg font-medium mb-4 text-foreground">Sample Records</h4>
                 <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="text-foreground">
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Date</TableHead>
@@ -244,7 +244,7 @@ export default function ConfirmStep({
                     </Table>
                 </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex justify-end">
                 <Button
@@ -264,4 +264,4 @@ export default function ConfirmStep({
             </div>
         </div>
     );
-} 
+}
