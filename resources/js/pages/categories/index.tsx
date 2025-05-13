@@ -18,7 +18,7 @@ interface Category {
   color: string | null;
   icon: string | null;
   parent_category_id: number | null;
-  parentCategory?: Category | null;
+  parent_category?: Category | null;
 }
 
 interface Props {
