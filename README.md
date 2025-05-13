@@ -4,18 +4,23 @@
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-red.svg)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-18.x-blue.svg)](https://reactjs.org)
 
+> ⚠️ **Pre-release Version Notice**
+> 
+> This is a pre-release version of Spendly. The application is currently in active development and many features are still being implemented. The codebase was built with significant AI assistance and requires refactoring for production use. Use at your own risk and feel free to contribute to its development.
+
+
 Spendly is an open-source personal finance tracker that helps you manage your finances, analyze spending patterns, and maintain budgets. It integrates with GoCardless for seamless bank account imports and provides powerful financial analysis tools.
 
 ## 📸 Screenshots
 
 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-    <img src="docs/images/dashboard.png" alt="Dashboard" style="width: 100%; border-radius: 8px;">
-    <img src="docs/images/transactions.png" alt="Transactions" style="width: 100%; border-radius: 8px;">
-    <img src="docs/images/accounts.png" alt="Budgets" style="width: 100%; border-radius: 8px;">
-    <img src="docs/images/account-detail.png" alt="Reports" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/dashboard.png" alt="Dashboard" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/transactions_list.png" alt="Transactions" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/accounts_list.png" alt="Accounts" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/account_detail.png" alt="Account Detail" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/categories_list.png" alt="Categories" style="width: 100%; border-radius: 8px;">
+    <img src="docs/screenshots/import_upload.png" alt="Import Upload" style="width: 100%; border-radius: 8px;">
 </div>
-
-
 
 ## 🌟 Features
 
@@ -26,6 +31,8 @@ Spendly is an open-source personal finance tracker that helps you manage your fi
 - **Reports & Visualizations**: Beautiful charts and reports for better financial understanding
 - **Multi-currency Support**: Track finances in multiple currencies
 - **Secure**: Bank-level security for your financial data
+- **CSV Import**: Import transactions from CSV files with customizable field mapping
+
 
 ## 🚀 Tech Stack
 
@@ -36,15 +43,7 @@ Spendly is an open-source personal finance tracker that helps you manage your fi
 - **API Integration**: GoCardless API
 - **Testing**: PHPUnit, Jest
 
-## 📋 Prerequisites
-
-- PHP 8.1 or higher
-- Node.js 16.x or higher
-- Composer
-- MySQL/PostgreSQL
-- GoCardless API credentials
-
-## 🛠️ Installation
+## 🐳 Quick Start
 
 1. Clone the repository:
 ```bash
@@ -52,75 +51,36 @@ git clone https://github.com/yourusername/spendly.git
 cd spendly
 ```
 
-2. Install PHP dependencies:
-```bash
-composer install
-```
-
-3. Install JavaScript dependencies:
-```bash
-npm install
-```
-
-4. Copy the environment file:
+2. Copy the environment file:
 ```bash
 cp .env.example .env
 ```
 
-5. Configure your environment variables in `.env`:
+3. Configure your environment variables in `.env`:
 ```
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=spendly
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=secret
 
 GOCARDLESS_ACCESS_TOKEN=your_access_token
 GOCARDLESS_ENVIRONMENT=sandbox
 ```
 
-6. Generate application key:
+
+
+4. Start the application:
 ```bash
-php artisan key:generate
+docker compose up -d
 ```
 
-7. Run migrations:
-```bash
-php artisan migrate
-```
 
-8. Start the development servers:
-```bash
-# Terminal 1 - Laravel
-php artisan serve
+The application will be available at:
+- http://localhost:80
 
-# Terminal 2 - React
-npm run dev
-```
-
-## 🧪 Testing
-
-Run the test suites:
-
-```bash
-# Backend tests
-php artisan test
-
-# Frontend tests
-npm test
-```
-
-## 📚 Documentation
-
-- [API Documentation](docs/api.md)
-- [Frontend Development Guide](docs/frontend.md)
-- [Backend Development Guide](docs/backend.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
+For detailed development setup and contribution guidelines, please see [Development Guide](docs/Development.md).
 
 ## 📄 License
 
