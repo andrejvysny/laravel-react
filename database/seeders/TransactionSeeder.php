@@ -18,23 +18,23 @@ class TransactionSeeder extends Seeder
         $user = User::where('email', 'demo@example.com')->first();
         $checkingAccount = Account::where('type', 'checking')->where('user_id', $user->id)->first();
         $creditCard = Account::where('type', 'credit')->where('user_id', $user->id)->first();
-        
+
         // Set initial balances (should match AccountSeeder)
         $checkingBalance = 5000.00;
         $creditBalance = -2500.00;
-        
+
         // Get categories for this user
         $salaryCategory = Category::where('name', 'Salary')->where('user_id', $user->id)->first();
         $groceriesCategory = Category::where('name', 'Groceries')->where('user_id', $user->id)->first();
         $restaurantsCategory = Category::where('name', 'Restaurants')->where('user_id', $user->id)->first();
         $rentCategory = Category::where('name', 'Rent')->where('user_id', $user->id)->first();
         $utilitiesCategory = Category::where('name', 'Utilities')->where('user_id', $user->id)->first();
-        
+
         // Get merchants for this user
         $walmart = Merchant::where('name', 'Walmart')->where('user_id', $user->id)->first();
         $starbucks = Merchant::where('name', 'Starbucks')->where('user_id', $user->id)->first();
         $mcdonalds = Merchant::where('name', 'McDonald\'s')->where('user_id', $user->id)->first();
-        
+
         // Get tags for this user
         $recurringTag = Tag::where('name', 'Recurring')->where('user_id', $user->id)->first();
         $personalTag = Tag::where('name', 'Personal')->where('user_id', $user->id)->first();
@@ -43,7 +43,7 @@ class TransactionSeeder extends Seeder
         // Create salary transaction
         $checkingBalance += 5000.00;
         $salaryTx = Transaction::create([
-            'transaction_id' => 'SAL-' . uniqid(),
+            'transaction_id' => 'SAL-'.uniqid(),
             'amount' => 5000.00,
             'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth(),
@@ -59,7 +59,7 @@ class TransactionSeeder extends Seeder
         // Create rent transaction
         $checkingBalance -= 1500.00;
         $rentTx = Transaction::create([
-            'transaction_id' => 'RENT-' . uniqid(),
+            'transaction_id' => 'RENT-'.uniqid(),
             'amount' => -1500.00,
             'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth()->addDays(2),
@@ -75,7 +75,7 @@ class TransactionSeeder extends Seeder
         // Create utilities transaction
         $checkingBalance -= 200.00;
         $utilTx = Transaction::create([
-            'transaction_id' => 'UTIL-' . uniqid(),
+            'transaction_id' => 'UTIL-'.uniqid(),
             'amount' => -200.00,
             'currency' => 'EUR',
             'booked_date' => Carbon::now()->startOfMonth()->addDays(5),
@@ -92,7 +92,7 @@ class TransactionSeeder extends Seeder
         for ($i = 0; $i < 4; $i++) {
             $creditBalance -= 150.00;
             $grocTx = Transaction::create([
-                'transaction_id' => 'GROC-' . uniqid(),
+                'transaction_id' => 'GROC-'.uniqid(),
                 'amount' => -150.00,
                 'currency' => 'EUR',
                 'booked_date' => Carbon::now()->startOfMonth()->addDays(rand(7, 25)),
@@ -113,7 +113,7 @@ class TransactionSeeder extends Seeder
             $creditBalance += $amount; // amount is negative, so this subtracts
             $merchant = rand(0, 1) ? $starbucks : $mcdonalds;
             $restTx = Transaction::create([
-                'transaction_id' => 'FOOD-' . uniqid(),
+                'transaction_id' => 'FOOD-'.uniqid(),
                 'amount' => $amount,
                 'currency' => 'EUR',
                 'booked_date' => Carbon::now()->startOfMonth()->addDays(rand(1, 28)),
@@ -142,7 +142,7 @@ class TransactionSeeder extends Seeder
             for ($i = 0; $i < 8; $i++) {
                 $creditBalance -= 5.50;
                 $transportTx = Transaction::create([
-                    'transaction_id' => 'PT-' . uniqid(),
+                    'transaction_id' => 'PT-'.uniqid(),
                     'amount' => -5.50,
                     'currency' => 'EUR',
                     'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
@@ -159,7 +159,7 @@ class TransactionSeeder extends Seeder
             // Fuel transactions
             $creditBalance -= 65.00;
             $fuelTx = Transaction::create([
-                'transaction_id' => 'FUEL-' . uniqid(),
+                'transaction_id' => 'FUEL-'.uniqid(),
                 'amount' => -65.00,
                 'currency' => 'EUR',
                 'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
@@ -179,7 +179,7 @@ class TransactionSeeder extends Seeder
             for ($i = 0; $i < 2; $i++) {
                 $creditBalance -= 15.00;
                 $movieTx = Transaction::create([
-                    'transaction_id' => 'MOV-' . uniqid(),
+                    'transaction_id' => 'MOV-'.uniqid(),
                     'amount' => -15.00,
                     'currency' => 'EUR',
                     'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
@@ -196,7 +196,7 @@ class TransactionSeeder extends Seeder
             // Gaming expenses
             $creditBalance -= 29.99;
             $gameTx = Transaction::create([
-                'transaction_id' => 'GAME-' . uniqid(),
+                'transaction_id' => 'GAME-'.uniqid(),
                 'amount' => -29.99,
                 'currency' => 'EUR',
                 'booked_date' => Carbon::now()->subMonths($month)->startOfMonth()->addDays(rand(1, 28)),
@@ -214,7 +214,7 @@ class TransactionSeeder extends Seeder
         for ($month = 1; $month <= 3; $month++) {
             $checkingBalance += 5000.00;
             $salaryTx = Transaction::create([
-                'transaction_id' => 'SAL-' . uniqid(),
+                'transaction_id' => 'SAL-'.uniqid(),
                 'amount' => 5000.00,
                 'currency' => 'EUR',
                 'booked_date' => Carbon::now()->subMonths($month)->startOfMonth(),
@@ -228,4 +228,4 @@ class TransactionSeeder extends Seeder
             $salaryTx->tags()->attach($recurringTag->id);
         }
     }
-} 
+}

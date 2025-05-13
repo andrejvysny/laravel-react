@@ -1,15 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { DataTable } from '@/components/DataTable';
 import AppLayout from '@/layouts/app-layout';
-import { Account, BreadcrumbItem, Import } from '@/types/index';
+import PageHeader from '@/layouts/page-header';
+import { BreadcrumbItem, Import } from '@/types/index';
+import { formatDate } from '@/utils/date';
 import { Head } from '@inertiajs/react';
-import axios from 'axios';
-import { format } from 'date-fns';
 import { useState } from 'react';
 import ImportWizard from './components/ImportWizard';
-import PageHeader from '@/layouts/page-header';
-import { DataTable } from '@/components/DataTable';
-import { formatDate } from '@/utils/date';
 
 interface Props {
     imports: Import[];
@@ -50,41 +46,42 @@ export default function Index({ imports }: Props) {
 
             <div className="mx-auto w-full max-w-7xl p-4">
                 <div className="mx-auto w-full max-w-7xl">
-                    <PageHeader title="Import tasks" buttons={[
-                        {
-                            onClick: () => setIsWizardOpen(true),
-                            label: 'Import',
-                        },
-                    ]}/>
+                    <PageHeader
+                        title="Import tasks"
+                        buttons={[
+                            {
+                                onClick: () => setIsWizardOpen(true),
+                                label: 'Import',
+                            },
+                        ]}
+                    />
                 </div>
             </div>
 
             <DataTable
-                columns={
-                    [
-                        { header: 'File', key: 'original_filename' },
-                        { header: 'Import Date', key: 'created_at', render: (row) => formatDate(row.created_at)},
-                        { header: 'Status', key: 'status', render: (row) => (
-                            <span className={`${getStatusBadgeClass(row.status)}`}>
-                                {row.status}
-                            </span>
-                        )} ,
-                        { header: 'Processed', key: 'processed_rows', render: (row) => (<p>{row.processed_rows} / {row.total_rows}</p>) },
-                        { header: 'Actions', key: 'actions', className: 'text-right', render: (row) => (<p>Action-{row.id}</p>) } // Custom render for actions column,
-                    ]
-                }
+                columns={[
+                    { header: 'File', key: 'original_filename' },
+                    { header: 'Import Date', key: 'created_at', render: (row) => formatDate(row.created_at) },
+                    { header: 'Status', key: 'status', render: (row) => <span className={`${getStatusBadgeClass(row.status)}`}>{row.status}</span> },
+                    {
+                        header: 'Processed',
+                        key: 'processed_rows',
+                        render: (row) => (
+                            <p>
+                                {row.processed_rows} / {row.total_rows}
+                            </p>
+                        ),
+                    },
+                    { header: 'Actions', key: 'actions', className: 'text-right', render: (row) => <p>Action-{row.id}</p> }, // Custom render for actions column,
+                ]}
                 emptyMessage="No import tasks found. Please create a new import task."
                 data={importsList}
-                rowKey={
-                    (record) => record.id
-                }
+                rowKey={(record) => record.id}
             />
-
-
 
             {isWizardOpen && (
                 <div className="fixed inset-0 z-50">
-                        <ImportWizard onComplete={handleImportComplete} onCancel={() => setIsWizardOpen(false)} />
+                    <ImportWizard onComplete={handleImportComplete} onCancel={() => setIsWizardOpen(false)} />
                 </div>
             )}
         </AppLayout>

@@ -1,17 +1,14 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Save, Trash2 } from 'lucide-react';
-import { Transaction, ImportMapping } from '@/types/index';
+import { ImportMapping, Transaction } from '@/types/index';
 import axios from 'axios';
-import { useState, useCallback, useEffect } from 'react';
+import { Save, Trash2 } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface ConfigureStepProps {
     headers: string[];
@@ -84,7 +81,6 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
     const [error, setError] = useState<string | null>(null);
     const [previewData, setPreviewData] = useState<Partial<Transaction>[]>([]);
 
-
     const [savedMappings, setSavedMappings] = useState<ImportMapping[]>([]);
     const [selectedMapping, setSelectedMapping] = useState<string>('none');
     const [saveMapping, setSaveMapping] = useState(false);
@@ -111,7 +107,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
         const initialMapping: Record<string, number | null> = {};
 
         // Initialize all fields as null (not mapped)
-        transactionFields.forEach(field => {
+        transactionFields.forEach((field) => {
             initialMapping[field.key] = null;
         });
 
@@ -128,7 +124,13 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 initialMapping['amount'] = index;
             }
             // Match description fields
-            else if (headerLower.includes('description') || headerLower.includes('details') || headerLower.includes('note') || headerLower.includes('text') || headerLower.includes('popis')) {
+            else if (
+                headerLower.includes('description') ||
+                headerLower.includes('details') ||
+                headerLower.includes('note') ||
+                headerLower.includes('text') ||
+                headerLower.includes('popis')
+            ) {
                 initialMapping['description'] = index;
             }
             // Match category fields
@@ -136,7 +138,12 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 initialMapping['category'] = index;
             }
             // Match partner/payee fields
-            else if (headerLower.includes('partner') || headerLower.includes('payee') || headerLower.includes('recipient') || headerLower.includes('merchant')) {
+            else if (
+                headerLower.includes('partner') ||
+                headerLower.includes('payee') ||
+                headerLower.includes('recipient') ||
+                headerLower.includes('merchant')
+            ) {
                 initialMapping['partner'] = index;
             }
             // Match IBAN fields
@@ -162,58 +169,64 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
 
     // Handle column selection change
     const handleColumnMappingChange = useCallback((field: string, value: string) => {
-        setColumnMapping(prev => ({
+        setColumnMapping((prev) => ({
             ...prev,
-            [field]: value ? parseInt(value) : null
+            [field]: value ? parseInt(value) : null,
         }));
     }, []);
 
     // Handle saved mapping selection
-    const handleMappingSelect = useCallback((mappingId: string) => {
-        setSelectedMapping(mappingId);
+    const handleMappingSelect = useCallback(
+        (mappingId: string) => {
+            setSelectedMapping(mappingId);
 
-        if (mappingId !== 'none') {
-            const mapping = savedMappings.find(m => m.id.toString() === mappingId);
-            if (mapping) {
-                setColumnMapping(mapping.column_mapping);
-                setDateFormat(mapping.date_format);
-                setAmountFormat(mapping.amount_format);
-                setAmountTypeStrategy(mapping.amount_type_strategy);
-                setCurrency(mapping.currency);
+            if (mappingId !== 'none') {
+                const mapping = savedMappings.find((m) => m.id.toString() === mappingId);
+                if (mapping) {
+                    setColumnMapping(mapping.column_mapping);
+                    setDateFormat(mapping.date_format);
+                    setAmountFormat(mapping.amount_format);
+                    setAmountTypeStrategy(mapping.amount_type_strategy);
+                    setCurrency(mapping.currency);
 
-                // Update the usage timestamp
-                axios.put(`/imports/mappings/${mapping.id}`).catch(err => {
-                    console.error('Failed to update mapping usage', err);
-                });
+                    // Update the usage timestamp
+                    axios.put(`/imports/mappings/${mapping.id}`).catch((err) => {
+                        console.error('Failed to update mapping usage', err);
+                    });
+                }
             }
-        }
-    }, [savedMappings]);
+        },
+        [savedMappings],
+    );
 
     // Handle mapping deletion
-    const handleDeleteMapping = useCallback(async (mappingId: number, e: React.MouseEvent) => {
-        e.stopPropagation();
+    const handleDeleteMapping = useCallback(
+        async (mappingId: number, e: React.MouseEvent) => {
+            e.stopPropagation();
 
-        if (confirm('Are you sure you want to delete this mapping?')) {
-            try {
-                await axios.delete(`/imports/mappings/${mappingId}`);
-                setSavedMappings(prev => prev.filter(m => m.id !== mappingId));
-                if (selectedMapping === mappingId.toString()) {
-                    setSelectedMapping('none');
+            if (confirm('Are you sure you want to delete this mapping?')) {
+                try {
+                    await axios.delete(`/imports/mappings/${mappingId}`);
+                    setSavedMappings((prev) => prev.filter((m) => m.id !== mappingId));
+                    if (selectedMapping === mappingId.toString()) {
+                        setSelectedMapping('none');
+                    }
+                } catch (err) {
+                    console.error('Failed to delete mapping', err);
                 }
-            } catch (err) {
-                console.error('Failed to delete mapping', err);
             }
-        }
-    }, [selectedMapping]);
+        },
+        [selectedMapping],
+    );
 
     // Submit configuration
     const handleSubmit = useCallback(async () => {
         // Validate required fields
-        const requiredFields = transactionFields.filter(field => field.required);
-        const missingFields = requiredFields.filter(field => columnMapping[field.key] === null);
+        const requiredFields = transactionFields.filter((field) => field.required);
+        const missingFields = requiredFields.filter((field) => columnMapping[field.key] === null);
 
         if (missingFields.length > 0) {
-            setError(`Missing required field mappings: ${missingFields.map(f => f.label).join(', ')}`);
+            setError(`Missing required field mappings: ${missingFields.map((f) => f.label).join(', ')}`);
             return;
         }
 
@@ -265,9 +278,8 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
     }, [columnMapping, dateFormat, amountFormat, amountTypeStrategy, currency, importId, onComplete, saveMapping, mappingName, bankName]);
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Configure your import</h3>
-
+        <div className="mx-auto max-w-4xl">
+            <h3 className="text-foreground mb-4 text-xl font-semibold">Configure your import</h3>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
                 <TabsList className="mb-4">
@@ -277,14 +289,14 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
 
                 <TabsContent value="saved">
                     {savedMappings.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {savedMappings.map(mapping => (
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            {savedMappings.map((mapping) => (
                                 <Card
                                     key={mapping.id}
-                                    className={`cursor-pointer bg-card border-foreground text-foreground ${selectedMapping === mapping.id.toString() ? 'outline-foreground outline-3' : ''}`}
+                                    className={`bg-card border-foreground text-foreground cursor-pointer ${selectedMapping === mapping.id.toString() ? 'outline-foreground outline-3' : ''}`}
                                     onClick={() => handleMappingSelect(mapping.id.toString())}
                                 >
-                                    <CardHeader className="p-4 flex flex-row items-center justify-between">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4">
                                         <div>
                                             <CardTitle className="text-lg">{mapping.name}</CardTitle>
                                             {mapping.bank_name && (
@@ -298,8 +310,10 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                                             <Trash2 size={16} />
                                         </button>
                                     </CardHeader>
-                                    <CardContent className="px-4 py-2 text-xs text-muted-foreground">
-                                        <div>Format: {mapping.date_format}, {mapping.amount_format}</div>
+                                    <CardContent className="text-muted-foreground px-4 py-2 text-xs">
+                                        <div>
+                                            Format: {mapping.date_format}, {mapping.amount_format}
+                                        </div>
                                         <div>Currency: {mapping.currency}</div>
                                         <div>Last used: {new Date(mapping.last_used_at || '').toLocaleDateString()}</div>
                                     </CardContent>
@@ -307,7 +321,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center p-8 border border-dashed border-gray-700 rounded-md">
+                        <div className="rounded-md border border-dashed border-gray-700 p-8 text-center">
                             <p className="text-muted-foreground">No saved mappings yet.</p>
                             <p className="text-muted-foreground mt-2">Configure manually and save for future use.</p>
                         </div>
@@ -315,21 +329,17 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
 
                     {selectedMapping !== 'none' && (
                         <div className="mt-6 flex justify-end">
-                            <Button onClick={() => setActiveTab('manual')}>
-                                Review Selected Mapping
-                            </Button>
+                            <Button onClick={() => setActiveTab('manual')}>Review Selected Mapping</Button>
                         </div>
                     )}
                 </TabsContent>
 
                 <TabsContent value="manual">
-                    <p className="mb-6 text-foreground">
-                        Select the columns that correspond to each field in your CSV.
-                    </p>
+                    <p className="text-foreground mb-6">Select the columns that correspond to each field in your CSV.</p>
 
                     {/* Column Mapping */}
-                    <div className="grid grid-cols-3 gap-6 mb-8 text-foreground">
-                        {transactionFields.map(field => (
+                    <div className="text-foreground mb-8 grid grid-cols-3 gap-6">
+                        {transactionFields.map((field) => (
                             <div key={field.key} className="space-y-2">
                                 <Label className="flex items-center gap-1">
                                     {field.label}
@@ -356,7 +366,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                     </div>
 
                     {/* Date and Amount Format */}
-                    <div className="grid grid-cols-2 gap-6 mb-8 text-foreground">
+                    <div className="text-foreground mb-8 grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Date Format</Label>
                             <Select value={dateFormat} onValueChange={setDateFormat}>
@@ -364,7 +374,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                                     <SelectValue placeholder="Select date format" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {dateFormats.map(format => (
+                                    {dateFormats.map((format) => (
                                         <SelectItem key={format.value} value={format.value}>
                                             {format.label}
                                         </SelectItem>
@@ -380,7 +390,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                                     <SelectValue placeholder="Select amount format" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {amountFormats.map(format => (
+                                    {amountFormats.map((format) => (
                                         <SelectItem key={format.value} value={format.value}>
                                             {format.label}
                                         </SelectItem>
@@ -391,7 +401,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                     </div>
 
                     {/* Amount Type Strategy and Currency */}
-                    <div className="grid grid-cols-2 gap-6 mb-8 text-foreground">
+                    <div className="text-foreground mb-8 grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Amount Type Strategy</Label>
                             <Select value={amountTypeStrategy} onValueChange={setAmountTypeStrategy}>
@@ -399,7 +409,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                                     <SelectValue placeholder="Select amount type strategy" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {amountTypeStrategies.map(strategy => (
+                                    {amountTypeStrategies.map((strategy) => (
                                         <SelectItem key={strategy.value} value={strategy.value}>
                                             {strategy.label}
                                         </SelectItem>
@@ -415,7 +425,7 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                                     <SelectValue placeholder="Select currency" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {currencies.map(curr => (
+                                    {currencies.map((curr) => (
                                         <SelectItem key={curr.value} value={curr.value}>
                                             {curr.label}
                                         </SelectItem>
@@ -426,14 +436,10 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                     </div>
 
                     {/* Save Mapping Option */}
-                    <div className="border border-muted-foreground bg-card p-4 rounded-md mb-8">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="border-muted-foreground bg-card mb-8 rounded-md border p-4">
+                        <div className="mb-4 flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="save-mapping"
-                                    checked={saveMapping}
-                                    onCheckedChange={setSaveMapping}
-                                />
+                                <Switch id="save-mapping" checked={saveMapping} onCheckedChange={setSaveMapping} />
                                 <Label htmlFor="save-mapping" className="text-foreground cursor-pointer">
                                     Save this configuration for future imports
                                 </Label>
@@ -444,13 +450,15 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                         {saveMapping && (
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="mapping-name">Mapping Name <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="mapping-name">
+                                        Mapping Name <span className="text-red-500">*</span>
+                                    </Label>
                                     <Input
                                         id="mapping-name"
                                         value={mappingName}
                                         onChange={(e) => setMappingName(e.target.value)}
                                         placeholder="e.g. My Bank Export"
-                                        className="border-foreground shadow-xs border-1 text-foreground"
+                                        className="border-foreground text-foreground border-1 shadow-xs"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -469,13 +477,12 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 </TabsContent>
             </Tabs>
 
-
-{/* Sample Data */}
-<div className="mb-8">
-                <h6 className="mb-4 text-foreground">Sample data from your uploaded CSV</h6>
-                <div className="rounded-lg border border-foreground overflow-x-auto">
+            {/* Sample Data */}
+            <div className="mb-8">
+                <h6 className="text-foreground mb-4">Sample data from your uploaded CSV</h6>
+                <div className="border-foreground overflow-x-auto rounded-lg border">
                     <table className="w-full">
-                        <thead className="bg-muted-foreground border-b border-foreground">
+                        <thead className="bg-muted-foreground border-foreground border-b">
                             <tr>
                                 {headers.map((header, index) => (
                                     <th key={index} className="px-4 py-2 text-left">
@@ -486,9 +493,9 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                         </thead>
                         <tbody>
                             {sampleRows.slice(0, 5).map((row, rowIndex) => (
-                                <tr key={rowIndex} className="border-b border-muted-foreground">
+                                <tr key={rowIndex} className="border-muted-foreground border-b">
                                     {row.map((cell, cellIndex) => (
-                                        <td key={cellIndex} className="px-4 py-2 text-foreground whitespace-nowrap truncate">
+                                        <td key={cellIndex} className="text-foreground truncate px-4 py-2 whitespace-nowrap">
                                             {cell}
                                         </td>
                                     ))}
@@ -499,17 +506,10 @@ export default function ConfigureStep({ headers, sampleRows, importId, onComplet
                 </div>
             </div>
 
-            {error && (
-                <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md mb-6">
-                    {error}
-                </div>
-            )}
+            {error && <div className="mb-6 rounded-md border border-red-800 bg-red-900/20 p-3 text-red-300">{error}</div>}
 
             <div className="flex justify-end">
-                <Button
-                    onClick={handleSubmit}
-                    disabled={isLoading || (activeTab === 'saved' && selectedMapping === 'none')}
-                >
+                <Button onClick={handleSubmit} disabled={isLoading || (activeTab === 'saved' && selectedMapping === 'none')}>
                     {isLoading ? 'Processing...' : 'Apply configuration'}
                 </Button>
             </div>

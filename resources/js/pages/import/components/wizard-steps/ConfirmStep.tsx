@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Category, Transaction } from '@/types/index';
-import { useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, FileText, CheckCircle2 } from 'lucide-react';
+import { Category, Transaction } from '@/types/index';
+import { CheckCircle2, FileText, Loader2 } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface ConfirmStepProps {
     data: Partial<Transaction>[];
@@ -42,10 +42,10 @@ export default function ConfirmStep({
         const uniqueValues: Record<MappingType, Set<string>> = {
             category: new Set<string>(),
             tag: new Set<string>(),
-            merchant: new Set<string>()
+            merchant: new Set<string>(),
         };
 
-        data.forEach(item => {
+        data.forEach((item) => {
             const extendedItem = item as ExtendedTransactionData;
             if (extendedItem.category) uniqueValues.category.add(extendedItem.category);
             if (extendedItem.tag) uniqueValues.tag.add(extendedItem.tag);
@@ -53,28 +53,31 @@ export default function ConfirmStep({
         });
 
         // Count new vs existing for each mapping type
-        const mappingStats = Object.entries(mappings || {}).reduce((acc, [type, typeMappings]) => {
-            if (!typeMappings) return acc;
+        const mappingStats = Object.entries(mappings || {}).reduce(
+            (acc, [type, typeMappings]) => {
+                if (!typeMappings) return acc;
 
-            const values = Array.from(uniqueValues[type as MappingType] || new Set());
-            acc[type] = {
-                total: values.length,
-                new: values.filter(v => typeMappings[v] === 'new').length,
-                existing: values.filter(v => typeMappings[v] !== 'new' && typeMappings[v] !== 'unmapped').length,
-                unmapped: values.filter(v => typeMappings[v] === 'unmapped').length
-            };
-            return acc;
-        }, {} as Record<string, { total: number; new: number; existing: number; unmapped: number }>);
+                const values = Array.from(uniqueValues[type as MappingType] || new Set());
+                acc[type] = {
+                    total: values.length,
+                    new: values.filter((v) => typeMappings[v] === 'new').length,
+                    existing: values.filter((v) => typeMappings[v] !== 'new' && typeMappings[v] !== 'unmapped').length,
+                    unmapped: values.filter((v) => typeMappings[v] === 'unmapped').length,
+                };
+                return acc;
+            },
+            {} as Record<string, { total: number; new: number; existing: number; unmapped: number }>,
+        );
 
         // Count expenses vs income
-        const expenses = data.filter(item => (item.amount || 0) < 0).length;
-        const income = data.filter(item => (item.amount || 0) >= 0).length;
+        const expenses = data.filter((item) => (item.amount || 0) < 0).length;
+        const income = data.filter((item) => (item.amount || 0) >= 0).length;
 
         return {
             totalRows,
             expenses,
             income,
-            mappings: mappingStats
+            mappings: mappingStats,
         };
     }, [data, mappings, totalRows]);
 
@@ -87,7 +90,7 @@ export default function ConfirmStep({
 
         return (
             <div className="mt-6">
-                <h5 className="font-medium mb-2 text-foreground">{typeTitle} Mappings</h5>
+                <h5 className="text-foreground mb-2 font-medium">{typeTitle} Mappings</h5>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -105,7 +108,7 @@ export default function ConfirmStep({
                                     ) : to === 'unmapped' ? (
                                         <span className="text-foreground">Unmapped</span>
                                     ) : (
-                                        options.find(opt => opt.id.toString() === to)?.name || to
+                                        options.find((opt) => opt.id.toString() === to)?.name || to
                                     )}
                                 </TableCell>
                             </TableRow>
@@ -117,69 +120,61 @@ export default function ConfirmStep({
     };
 
     return (
-        <div className="max-w-3xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Confirm Import</h3>
-            <p className="mb-6 text-muted-foreground">
-                Please review the summary below and confirm to process the import.
-            </p>
+        <div className="mx-auto max-w-3xl">
+            <h3 className="text-foreground mb-4 text-xl font-semibold">Confirm Import</h3>
+            <p className="text-muted-foreground mb-6">Please review the summary below and confirm to process the import.</p>
 
             {/* Error message */}
-            {error && (
-                <div className="bg-red-900/20 border border-red-800 text-destructive-foreground p-3 rounded-md mb-6">
-                    {error}
-                </div>
-            )}
+            {error && <div className="text-destructive-foreground mb-6 rounded-md border border-red-800 bg-red-900/20 p-3">{error}</div>}
 
             {/* Loading overlay */}
             {isLoading && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-                    <div className="bg-card p-8 rounded-lg shadow-md flex flex-col items-center gap-6 max-w-md w-full mx-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="bg-card mx-4 flex w-full max-w-md flex-col items-center gap-6 rounded-lg p-8 shadow-md">
                         <div className="flex items-center gap-4">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <h3 className="text-xl font-semibold text-foreground">Processing Import</h3>
+                            <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                            <h3 className="text-foreground text-xl font-semibold">Processing Import</h3>
                         </div>
 
                         <div className="w-full space-y-4">
-                            <div className="flex items-center gap-3 text-foreground">
+                            <div className="text-foreground flex items-center gap-3">
                                 <FileText className="h-5 w-5" />
                                 <span>Importing {totalRows} transactions...</span>
                             </div>
 
-                            <div className="flex items-center gap-3 text-foreground">
+                            <div className="text-foreground flex items-center gap-3">
                                 <CheckCircle2 className="h-5 w-5 text-green-400" />
                                 <span>Creating new categories, tags, and merchants...</span>
                             </div>
 
-                            <div className="flex items-center gap-3 text-foreground">
+                            <div className="text-foreground flex items-center gap-3">
                                 <CheckCircle2 className="h-5 w-5 text-green-400" />
                                 <span>Mapping relationships...</span>
                             </div>
                         </div>
 
-                        <p className="text-sm text-muted-foreground mt-2">
-                            Please wait while we process your import. This may take a few moments.
-                        </p>
+                        <p className="text-muted-foreground mt-2 text-sm">Please wait while we process your import. This may take a few moments.</p>
                     </div>
                 </div>
             )}
 
             {/* Import Summary */}
-            <div className={`rounded-lg border border-foreground p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h4 className="text-lg font-medium mb-4 text-foreground">Import Summary</h4>
+            <div className={`border-foreground mb-8 rounded-lg border p-6 ${isLoading ? 'pointer-events-none opacity-50' : ''}`}>
+                <h4 className="text-foreground mb-4 text-lg font-medium">Import Summary</h4>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Rows:</span>
-                            <span className="font-medium text-foreground">{stats.totalRows}</span>
+                            <span className="text-foreground font-medium">{stats.totalRows}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Expense Transactions:</span>
-                            <span className="font-medium text-foreground">{stats.expenses}</span>
+                            <span className="text-foreground font-medium">{stats.expenses}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Income Transactions:</span>
-                            <span className="font-medium text-foreground">{stats.income}</span>
+                            <span className="text-foreground font-medium">{stats.income}</span>
                         </div>
                     </div>
 
@@ -187,19 +182,19 @@ export default function ConfirmStep({
                         <div key={type} className="space-y-2">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Unique {type.charAt(0).toUpperCase() + type.slice(1)}s:</span>
-                                <span className="font-medium text-foreground">{typeStats.total}</span>
+                                <span className="text-foreground font-medium">{typeStats.total}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">New {type}s:</span>
-                                <span className="font-medium text-foreground">{typeStats.new}</span>
+                                <span className="text-foreground font-medium">{typeStats.new}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Mapped to Existing:</span>
-                                <span className="font-medium text-foreground">{typeStats.existing}</span>
+                                <span className="text-foreground font-medium">{typeStats.existing}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Unmapped:</span>
-                                <span className="font-medium text-foreground">{typeStats.unmapped}</span>
+                                <span className="text-foreground font-medium">{typeStats.unmapped}</span>
                             </div>
                         </div>
                     ))}
@@ -212,8 +207,8 @@ export default function ConfirmStep({
             </div>
 
             {/* Sample Records */}
-            <div className={`rounded-lg border border-1 p-6 mb-8 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                <h4 className="text-lg font-medium mb-4 text-foreground">Sample Records</h4>
+            <div className={`mb-8 rounded-lg border border-1 p-6 ${isLoading ? 'pointer-events-none opacity-50' : ''}`}>
+                <h4 className="text-foreground mb-4 text-lg font-medium">Sample Records</h4>
                 <div className="overflow-x-auto">
                     <Table className="text-foreground">
                         <TableHeader>
@@ -247,11 +242,7 @@ export default function ConfirmStep({
 
             {/* Action Buttons */}
             <div className="flex justify-end">
-                <Button
-                    onClick={onConfirm}
-                    disabled={isLoading}
-                    className="min-w-[150px]"
-                >
+                <Button onClick={onConfirm} disabled={isLoading} className="min-w-[150px]">
                     {isLoading ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

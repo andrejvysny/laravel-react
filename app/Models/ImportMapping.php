@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ImportMapping extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -26,7 +26,7 @@ class ImportMapping extends Model
         'currency',
         'last_used_at',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -36,7 +36,7 @@ class ImportMapping extends Model
         'column_mapping' => 'array',
         'last_used_at' => 'datetime',
     ];
-    
+
     /**
      * Get the user that owns the import mapping.
      */
@@ -44,4 +44,4 @@ class ImportMapping extends Model
     {
         return $this->belongsTo(User::class);
     }
-} 
+}

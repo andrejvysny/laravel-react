@@ -32,4 +32,4 @@ class Tag extends Model
     {
         return $this->belongsToMany(Transaction::class);
     }
-} 
+}

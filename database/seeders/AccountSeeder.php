@@ -64,4 +64,4 @@ class AccountSeeder extends Seeder
             ]);
         }
     }
-} 
+}

@@ -1,12 +1,5 @@
 import AccountDetailMonthlyComparisonChart from '@/components/accounts/AccountDetailMonthlyComparisonChart';
 import TransactionList from '@/components/transactions/TransactionList';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
-import { Account, Transaction } from '@/types/index';
-import { formatDate } from '@/utils/date';
-import { Head, router } from '@inertiajs/react';
-import axios from 'axios';
-import { useState } from 'react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -17,8 +10,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import ValueSplit from '@/components/ui/value-split';
+import AppLayout from '@/layouts/app-layout';
+import { Account, Transaction } from '@/types/index';
+import { formatDate } from '@/utils/date';
+import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
+import { useState } from 'react';
 
 interface Props {
     account: Account;
@@ -57,12 +57,11 @@ export default function Detail({ account, transactions, monthlySummaries, total_
                 },
                 onError: (error) => {
                     console.error('Failed to delete account:', error);
-                }
+                },
             });
         } finally {
             setIsDeleting(false);
         }
-    
     };
 
     // Group transactions by month and then by date
@@ -104,7 +103,7 @@ export default function Detail({ account, transactions, monthlySummaries, total_
                         <div className="sticky top-8">
                             <div className="bg-card mb-6 w-full rounded-xl border-1 p-6 shadow-xs">
                                 <h2 className="text-xl font-semibold">{account.name}</h2>
-                                <div className="mb-4 font-bold text-muted-foreground">{account.bank_name}</div>
+                                <div className="text-muted-foreground mb-4 font-bold">{account.bank_name}</div>
 
                                 <ValueSplit
                                     className="mb-4"
@@ -172,9 +171,9 @@ export default function Detail({ account, transactions, monthlySummaries, total_
                                 </div>
                             )}
                             {/* Analytics/Graphs Placeholder */}
-                            <div className="bg-card shadow-xs border-1 mb-6 w-full rounded-xl p-6">
+                            <div className="bg-card mb-6 w-full rounded-xl border-1 p-6 shadow-xs">
                                 <h3 className="mb-4 text-lg font-semibold">Category spending</h3>
-                                <div className="flex h-32 items-center justify-center text-muted-foreground">
+                                <div className="text-muted-foreground flex h-32 items-center justify-center">
                                     {/* Replace with real chart component */}
                                     <span>coming soon…</span>
                                 </div>
@@ -184,7 +183,7 @@ export default function Detail({ account, transactions, monthlySummaries, total_
                     {/* Right: Transactions List */}
                     <div className="flex-1">
                         <div className="mb-6 flex flex-col">
-                            <div className="bg-card shadow-xs border-1 rounded-xl p-5">
+                            <div className="bg-card rounded-xl border-1 p-5 shadow-xs">
                                 <h3 className="mb-4 text-lg font-semibold">Monthly comparison</h3>
 
                                 <AccountDetailMonthlyComparisonChart

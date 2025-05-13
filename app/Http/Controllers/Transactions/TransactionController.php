@@ -3,9 +3,6 @@
 namespace App\Http\Controllers\Transactions;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Merchant;
-use App\Models\Tag;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,11 +13,11 @@ class TransactionController extends Controller
     public function index()
     {
         $transactions = Transaction::with([
-                'account', 
-                'merchant', 
-                'category', 
-                'tags'
-            ])
+            'account',
+            'merchant',
+            'category',
+            'tags',
+        ])
             ->orderBy('booked_date', 'desc')
             ->get();
 
@@ -84,8 +81,8 @@ class TransactionController extends Controller
             unset($validated['tags']);
 
             $transaction = Transaction::create($validated);
-            
-            if (!empty($tagIds)) {
+
+            if (! empty($tagIds)) {
                 $transaction->tags()->attach($tagIds);
             }
 
@@ -111,7 +108,7 @@ class TransactionController extends Controller
             unset($validated['tags']);
 
             $transaction->update($validated);
-            
+
             if (isset($request->tags)) {
                 $transaction->tags()->sync($tagIds);
             }

@@ -14,15 +14,15 @@ return new class extends Migration
         // Check if the old table exists and rename it if it does
         if (Schema::hasTable('transaction_tag')) {
             Schema::rename('transaction_tag', 'tag_transaction');
-        } 
+        }
         // Otherwise create the tag_transaction table if it doesn't exist
-        else if (!Schema::hasTable('tag_transaction')) {
+        elseif (! Schema::hasTable('tag_transaction')) {
             Schema::create('tag_transaction', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
                 $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
                 $table->timestamps();
-    
+
                 $table->unique(['transaction_id', 'tag_id']);
             });
         }
@@ -37,4 +37,4 @@ return new class extends Migration
             Schema::rename('tag_transaction', 'transaction_tag');
         }
     }
-}; 
+};

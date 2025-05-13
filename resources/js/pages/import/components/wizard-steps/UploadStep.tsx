@@ -1,18 +1,12 @@
-import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import axios from 'axios';
+import React, { useCallback, useState } from 'react';
 
 interface UploadStepProps {
-    onComplete: (data: {
-        importId: number;
-        headers: string[];
-        sampleRows: string[][];
-        accountId: number;
-        totalRows: number;
-    }) => void;
+    onComplete: (data: { importId: number; headers: string[]; sampleRows: string[][]; accountId: number; totalRows: number }) => void;
 }
 
 export default function UploadStep({ onComplete }: UploadStepProps) {
@@ -26,14 +20,15 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
 
     // Load accounts on component mount
     React.useEffect(() => {
-        axios.get('/accounts')
-            .then(response => {
+        axios
+            .get('/accounts')
+            .then((response) => {
                 setAccounts(response.data.accounts);
                 if (response.data.accounts.length > 0) {
                     setAccountId(response.data.accounts[0].id.toString());
                 }
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error('Failed to load accounts', err);
                 setError('Failed to load accounts');
             });
@@ -46,50 +41,52 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
         }
     }, []);
 
-    const handleSubmit = useCallback(async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!file || !accountId) return;
+    const handleSubmit = useCallback(
+        async (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!file || !accountId) return;
 
-        setIsLoading(true);
-        setError(null);
+            setIsLoading(true);
+            setError(null);
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('account_id', accountId);
-        formData.append('delimiter', delimiter);
-        formData.append('quote_char', quoteChar);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('account_id', accountId);
+            formData.append('delimiter', delimiter);
+            formData.append('quote_char', quoteChar);
 
-        try {
-            const response = await axios.post('/imports/upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            try {
+                const response = await axios.post('/imports/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
 
-            onComplete({
-                importId: response.data.import_id,
-                headers: response.data.headers,
-                sampleRows: response.data.sample_rows,
-                accountId: parseInt(accountId),
-                totalRows: response.data.total_rows,
-            });
-        } catch (err: any) {
-            console.error('Upload error:', err);
-            setError(err.response?.data?.message || 'Failed to upload file');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [file, accountId, delimiter, quoteChar, onComplete]);
+                onComplete({
+                    importId: response.data.import_id,
+                    headers: response.data.headers,
+                    sampleRows: response.data.sample_rows,
+                    accountId: parseInt(accountId),
+                    totalRows: response.data.total_rows,
+                });
+            } catch (err: any) {
+                console.error('Upload error:', err);
+                setError(err.response?.data?.message || 'Failed to upload file');
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [file, accountId, delimiter, quoteChar, onComplete],
+    );
 
     return (
-        <div className="max-w-xl mx-auto">
-            <h3 className="text-xl text-foreground font-semibold mb-4">Upload your transaction data</h3>
-            <p className="mb-6 text-foreground">
+        <div className="mx-auto max-w-xl">
+            <h3 className="text-foreground mb-4 text-xl font-semibold">Upload your transaction data</h3>
+            <p className="text-foreground mb-6">
                 Upload a CSV file containing your transaction data. We'll help you map the columns to fields in our system.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6 text-foreground bg-card p-6 rounded-lg shadow-md">
-
+            <form onSubmit={handleSubmit} className="text-foreground bg-card space-y-6 rounded-lg p-6 shadow-md">
                 {/* Account Selection */}
                 <div className="space-y-2">
                     <Label htmlFor="account">Account</Label>
@@ -98,7 +95,7 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
                             <SelectValue placeholder="Select an account" />
                         </SelectTrigger>
                         <SelectContent>
-                            {accounts.map(account => (
+                            {accounts.map((account) => (
                                 <SelectItem key={account.id} value={account.id.toString()}>
                                     {account.name}
                                 </SelectItem>
@@ -141,29 +138,18 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
                     </div>
                 </div>
 
-
                 {/* File Upload */}
                 <div className="space-y-2">
                     <Label htmlFor="file">CSV File</Label>
-                    <div className="border border-dashed border-gray-700 rounded-md p-6 text-center">
-                        <Input
-                            id="file"
-                            type="file"
-                            accept=".csv,.txt"
-                            onChange={handleFileChange}
-                            className="hidden"
-                        />
+                    <div className="rounded-md border border-dashed border-gray-700 p-6 text-center">
+                        <Input id="file" type="file" accept=".csv,.txt" onChange={handleFileChange} className="hidden" />
                         <div className="flex flex-col items-center justify-center gap-2">
                             {file ? (
-                                <div className="text-green-500 font-medium">{file.name}</div>
+                                <div className="font-medium text-green-500">{file.name}</div>
                             ) : (
                                 <>
                                     <div className="text-gray-400">Drag & drop your file here, or</div>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => document.getElementById('file')?.click()}
-                                    >
+                                    <Button type="button" variant="outline" onClick={() => document.getElementById('file')?.click()}>
                                         Browse Files
                                     </Button>
                                 </>
@@ -185,12 +171,7 @@ export default function UploadStep({ onComplete }: UploadStepProps) {
                     )}
                 </div>
 
-
-                {error && (
-                    <div className="bg-red-900/20 border border-red-800 text-red-300 p-3 rounded-md">
-                        {error}
-                    </div>
-                )}
+                {error && <div className="rounded-md border border-red-800 bg-red-900/20 p-3 text-red-300">{error}</div>}
 
                 <div className="flex justify-end">
                     <Button type="submit" disabled={isLoading || !file || !accountId}>

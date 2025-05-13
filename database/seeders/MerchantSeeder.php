@@ -74,4 +74,4 @@ class MerchantSeeder extends Seeder
             ]);
         }
     }
-} 
+}

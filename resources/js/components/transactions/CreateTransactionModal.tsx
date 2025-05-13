@@ -1,9 +1,9 @@
-import { Transaction } from '@/types/index';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SelectInput, TextInput } from '@/components/ui/form-inputs';
+import { InferFormValues, SmartForm } from '@/components/ui/smart-form';
+import { Transaction } from '@/types/index';
 import { z } from 'zod';
-import { SmartForm, InferFormValues } from '@/components/ui/smart-form';
-import { TextInput, SelectInput } from '@/components/ui/form-inputs';
 
 interface CreateTransactionModalProps {
     isOpen: boolean;
@@ -76,82 +76,34 @@ export default function CreateTransactionModal({ isOpen, onClose, onSubmit }: Cr
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>New Transaction</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details to create a new transaction.
-                    </DialogDescription>
+                    <DialogDescription>Fill in the details to create a new transaction.</DialogDescription>
                 </DialogHeader>
-                <SmartForm
-                    schema={transactionSchema}
-                    defaultValues={defaultValues}
-                    onSubmit={handleSubmit}
-                    formProps={{ className: 'space-y-4' }}
-                >
+                <SmartForm schema={transactionSchema} defaultValues={defaultValues} onSubmit={handleSubmit} formProps={{ className: 'space-y-4' }}>
                     {() => (
                         <>
-                            <TextInput<FormValues>
-                                name="partner"
-                                label="Partner"
-                                required
-                            />
+                            <TextInput<FormValues> name="partner" label="Partner" required />
 
-                            <TextInput<FormValues>
-                                name="amount"
-                                label="Amount"
-                                type="number"
-                                required
-                            />
+                            <TextInput<FormValues> name="amount" label="Amount" type="number" required />
 
-                            <SelectInput<FormValues>
-                                name="currency"
-                                label="Currency"
-                                options={currencies}
-                                required
-                            />
+                            <SelectInput<FormValues> name="currency" label="Currency" options={currencies} required />
 
-                            <TextInput<FormValues>
-                                name="description"
-                                label="Description"
-                                required
-                            />
+                            <TextInput<FormValues> name="description" label="Description" required />
 
-                            <SelectInput<FormValues>
-                                name="type"
-                                label="Type"
-                                options={transactionTypes}
-                                required
-                            />
+                            <SelectInput<FormValues> name="type" label="Type" options={transactionTypes} required />
 
-                            <TextInput<FormValues>
-                                name="target_iban"
-                                label="Target IBAN"
-                            />
+                            <TextInput<FormValues> name="target_iban" label="Target IBAN" />
 
-                            <TextInput<FormValues>
-                                name="source_iban"
-                                label="Source IBAN"
-                            />
+                            <TextInput<FormValues> name="source_iban" label="Source IBAN" />
 
-                            <TextInput<FormValues>
-                                name="booked_date"
-                                label="Booked Date"
-                                type="date"
-                                required
-                            />
+                            <TextInput<FormValues> name="booked_date" label="Booked Date" type="date" required />
 
-                            <TextInput<FormValues>
-                                name="processed_date"
-                                label="Processed Date"
-                                type="date"
-                                required
-                            />
+                            <TextInput<FormValues> name="processed_date" label="Processed Date" type="date" required />
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={onClose}>
                                     Cancel
                                 </Button>
-                                <Button type="submit">
-                                    Create Transaction
-                                </Button>
+                                <Button type="submit">Create Transaction</Button>
                             </DialogFooter>
                         </>
                     )}

@@ -86,16 +86,14 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 p-4">
                 {/* Top widgets row */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-
-
                     {/* Accounts List Widget */}
-                    <div className="rounded-xl bg-card shadow-xs border-1 p-6">
-                        <div className="mb-2 text-sm text-muted-foreground">Accounts</div>
+                    <div className="bg-card rounded-xl border-1 p-6 shadow-xs">
+                        <div className="text-muted-foreground mb-2 text-sm">Accounts</div>
                         <ul>
                             {accounts.slice(0, 5).map((acc) => (
                                 <li key={acc.id} className="flex justify-between py-1">
                                     <a href={`/accounts/${acc.id}`} className="flex w-full justify-between transition-colors hover:text-blue-500">
-                                        <span className="text-current font-semibold">{acc.name}</span>
+                                        <span className="font-semibold text-current">{acc.name}</span>
                                         <span className="font-semibold text-green-500">
                                             {Number(acc.balance).toFixed(2)} {acc.currency}
                                         </span>
@@ -103,29 +101,27 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                                 </li>
                             ))}
                         </ul>
-                        {accounts.length > 5 && <div className="mt-2 text-xs text-muted-foreground">+{accounts.length - 5} more accounts</div>}
+                        {accounts.length > 5 && <div className="text-muted-foreground mt-2 text-xs">+{accounts.length - 5} more accounts</div>}
                     </div>
 
-
                     {/* Total Balance Widget */}
-                    <div className="flex flex-col items-center justify-center rounded-xl bg-card shadow-xs border-1 p-6">
-                        <span className="mb-2 font-semibold text-muted-foreground">Net Worth</span>
+                    <div className="bg-card flex flex-col items-center justify-center rounded-xl border-1 p-6 shadow-xs">
+                        <span className="text-muted-foreground mb-2 font-semibold">Net Worth</span>
                         <span className="text-4xl font-bold text-green-500">{totalBalance.toFixed(2)} €</span>
                     </div>
                     {/* Stats Widget */}
-                    <div className="flex flex-col items-center justify-center rounded-xl bg-card shadow-xs border-1 p-6">
+                    <div className="bg-card flex flex-col items-center justify-center rounded-xl border-1 p-6 shadow-xs">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col items-center">
-                                <span className="text-sm text-muted-foreground">Accounts</span>
+                                <span className="text-muted-foreground text-sm">Accounts</span>
                                 <span className="text-xl font-bold text-blue-400">{accounts.length}</span>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
 
                 {/* Balance Chart */}
-                <div className="rounded-xl bg-card shadow-xs border-1 p-6">
+                <div className="bg-card rounded-xl border-1 p-6 shadow-xs">
                     <h3 className="mb-4 text-lg font-semibold text-white">Balance Over Time</h3>
                     <div className="h-64">
                         <Line data={chartData} options={chartOptions} />
@@ -133,7 +129,7 @@ export default function Dashboard({ accounts, recentTransactions, monthlyBalance
                 </div>
 
                 {/* Recent Transactions Table */}
-                <div className="mt-4 rounded-xl bg-card shadow-xs border-1 p-6">
+                <div className="bg-card mt-4 rounded-xl border-1 p-6 shadow-xs">
                     <h3 className="mb-4 text-lg font-semibold text-white">Latest Transactions</h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-sm">

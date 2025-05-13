@@ -47,23 +47,19 @@ function TransactionList({ transactions, monthlySummaries }: Props) {
                     <div key={month} className="mb-10 flex flex-col gap-2 pb-10">
                         {/* Summary at the top of the month */}
                         <div className="mb-1 flex items-center">
-                            <span className="font-semibold text-2xl">{month}</span>
+                            <span className="text-2xl font-semibold">{month}</span>
                         </div>
-                        <div className="mb-4 flex rounded-xl bg-card shadow xs border-1 border-current">
+                        <div className="bg-card xs mb-4 flex rounded-xl border-1 border-current shadow">
                             <div className="flex w-full divide-x divide-gray-400 p-4">
-                                <div className="flex-1 flex flex-col items-start pr-6">
+                                <div className="flex flex-1 flex-col items-start pr-6">
                                     <span className="mb-1 text-xs text-gray-400">Income</span>
-                                    <span className="text-xl font-medium">
-                                        +{summary.income.toFixed(2)}€
-                                    </span>
+                                    <span className="text-xl font-medium">+{summary.income.toFixed(2)}€</span>
                                 </div>
-                                <div className="flex-1 flex flex-col items-start px-6">
+                                <div className="flex flex-1 flex-col items-start px-6">
                                     <span className="mb-1 text-xs text-gray-400">Expense</span>
-                                    <span className="text-xl font-medium">
-                                        -{summary.expense.toFixed(2)}€
-                                    </span>
+                                    <span className="text-xl font-medium">-{summary.expense.toFixed(2)}€</span>
                                 </div>
-                                <div className="flex-1 flex flex-col items-start pl-6">
+                                <div className="flex flex-1 flex-col items-start pl-6">
                                     <span className="mb-1 text-xs text-gray-400">Balance</span>
                                     <span className={`text-xl font-bold ${summary.balance >= 0 ? 'text-green-500' : 'text-destructive-foreground'}`}>
                                         {summary.balance.toFixed(2)}€
@@ -74,7 +70,7 @@ function TransactionList({ transactions, monthlySummaries }: Props) {
                         {/* All date groups for this month */}
                         {sortedDates.map((date) => (
                             <div key={date} className="flex flex-col gap-2">
-                                <h3 className="px-2 text-sm text-muted-foreground">{date}</h3>
+                                <h3 className="text-muted-foreground px-2 text-sm">{date}</h3>
                                 <div className="flex flex-col gap-3">
                                     {dateGroups[date].map((transaction) => (
                                         <TransactionComponent key={transaction.id} {...transaction} />

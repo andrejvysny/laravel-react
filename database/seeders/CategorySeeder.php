@@ -11,7 +11,7 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $user = User::where('email', 'demo@example.com')->first();
-        
+
         // Income categories
         $income = Category::create([
             'name' => 'Income',
@@ -160,4 +160,4 @@ class CategorySeeder extends Seeder
             'user_id' => $user->id,
         ]);
     }
-} 
+}

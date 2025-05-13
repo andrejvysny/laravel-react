@@ -3,10 +3,10 @@ import { NavMain } from '@/components/app/sidebar/nav-main';
 import { NavUser } from '@/components/app/sidebar/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types/index';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Coins, LayoutGrid, PieChartIcon, TagIcon, Users, ShoppingBag, Tags } from 'lucide-react';
-import AppLogo from './app-logo';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { Link } from '@inertiajs/react';
+import { BookOpen, Coins, LayoutGrid, PieChartIcon, ShoppingBag, TagIcon, Tags, Users } from 'lucide-react';
+import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
@@ -54,7 +54,6 @@ const mainNavItems: NavItem[] = [
         href: '/imports',
         icon: ArrowDownTrayIcon,
     },
-
 ];
 
 const footerNavItems: NavItem[] = [

@@ -10,4 +10,4 @@ class AnalyticsController extends Controller
     {
         return Inertia::render('Analytics/Index');
     }
-} 
+}

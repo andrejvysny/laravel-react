@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\Import;
 use App\Models\Category;
+use App\Models\Import;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ImportController extends Controller
@@ -52,11 +52,11 @@ class ImportController extends Controller
 
         $file = $request->file('file');
         $originalFilename = $file->getClientOriginalName();
-        $filename = Str::random(40) . '.csv';
+        $filename = Str::random(40).'.csv';
 
         Log::debug('Generated filename', [
             'original' => $originalFilename,
-            'generated' => $filename
+            'generated' => $filename,
         ]);
 
         // Preprocess the CSV file to ensure proper UTF-8 encoding
@@ -71,7 +71,7 @@ class ImportController extends Controller
         $sampleData = $this->getSampleData($path, $request->delimiter, $request->quote_char);
         Log::debug('Sample data read', [
             'headers_count' => count($sampleData['headers']),
-            'rows_count' => count($sampleData['rows'])
+            'rows_count' => count($sampleData['rows']),
         ]);
 
         // Calculate total rows (excluding header)
@@ -110,7 +110,7 @@ class ImportController extends Controller
     {
         Log::debug('Starting CSV preprocessing', [
             'delimiter' => $delimiter,
-            'quote_char' => $quoteChar
+            'quote_char' => $quoteChar,
         ]);
 
         // Create a temporary file for the preprocessed content
@@ -144,6 +144,7 @@ class ImportController extends Controller
         fclose($handle);
 
         Log::debug('CSV preprocessing completed', ['temp_file' => $tempFile]);
+
         return $tempFile;
     }
 
@@ -180,7 +181,7 @@ class ImportController extends Controller
 
         // Try to detect encoding using mb_detect_encoding
         $detectedEncoding = mb_detect_encoding($content, [
-            'UTF-8', 'UTF-16LE', 'UTF-16BE', 'ASCII', 'ISO-8859-1', 'ISO-8859-15', 'Windows-1252'
+            'UTF-8', 'UTF-16LE', 'UTF-16BE', 'ASCII', 'ISO-8859-1', 'ISO-8859-15', 'Windows-1252',
         ], true);
 
         return $detectedEncoding ?: 'UTF-8'; // Default to UTF-8 if detection fails
@@ -242,7 +243,7 @@ class ImportController extends Controller
         if ($import->user_id !== Auth::id()) {
             Log::warning('Unauthorized import access attempt', [
                 'import_id' => $import->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
             abort(403);
         }
@@ -250,6 +251,7 @@ class ImportController extends Controller
         // Check if the import is already processed
         if ($import->status === Import::STATUS_COMPLETED) {
             Log::info('Import already processed', ['import_id' => $import->id]);
+
             return response()->json([
                 'message' => 'Import already processed',
                 'import' => $import,
@@ -285,11 +287,12 @@ class ImportController extends Controller
                     // Skip null lines or empty arrays
                     if ($line === null || (is_array($line) && count($line) === 0)) {
                         Log::warning('Skipping empty line', ['row_number' => $processed + $failed + $skipped + 1]);
+
                         continue;
                     }
 
                     $result = $this->processImportRow($line, $import, $accountId);
-                    
+
                     // Check if the transaction was skipped (duplicate)
                     if ($result === 'skipped') {
                         $skipped++;
@@ -301,7 +304,7 @@ class ImportController extends Controller
                         Log::debug('Processing progress', [
                             'processed' => $processed,
                             'failed' => $failed,
-                            'skipped' => $skipped
+                            'skipped' => $skipped,
                         ]);
                     }
                 } catch (\Exception $e) {
@@ -309,7 +312,7 @@ class ImportController extends Controller
                     Log::error('Failed to process row', [
                         'error' => $e->getMessage(),
                         'row_number' => $processed + $failed + $skipped,
-                        'line' => $line ?? 'null'
+                        'line' => $line ?? 'null',
                     ]);
                 }
             }
@@ -321,12 +324,12 @@ class ImportController extends Controller
             $import->failed_rows = $failed;
             $import->status = $skipped > 0 ? Import::STATUS_COMPLETED_SKIPPED_DUPLICATES : Import::STATUS_COMPLETED;
             $import->processed_at = now();
-            
+
             // Add skipped transactions to metadata
             $metadata = $import->metadata ?? [];
             $metadata['skipped_rows'] = $skipped;
             $import->metadata = $metadata;
-            
+
             $import->save();
 
             Log::info('Import completed successfully', [
@@ -334,32 +337,32 @@ class ImportController extends Controller
                 'processed' => $processed,
                 'failed' => $failed,
                 'skipped' => $skipped,
-                'status' => $import->status
+                'status' => $import->status,
             ]);
 
             return response()->json([
-                'message' => $skipped > 0 
+                'message' => $skipped > 0
                     ? 'Import completed with some duplicate transactions skipped'
                     : 'Import processed successfully',
                 'import' => $import,
                 'stats' => [
                     'processed' => $processed,
                     'failed' => $failed,
-                    'skipped' => $skipped
-                ]
+                    'skipped' => $skipped,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Import failed', [
                 'import_id' => $import->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $import->status = Import::STATUS_FAILED;
             $import->save();
 
             return response()->json([
-                'message' => 'Import failed: ' . $e->getMessage(),
+                'message' => 'Import failed: '.$e->getMessage(),
                 'import' => $import,
             ], 500);
         }
@@ -390,7 +393,7 @@ class ImportController extends Controller
             'path' => $path,
             'sample_size' => $sampleSize,
             'delimiter' => $delimiter,
-            'quote_char' => $quoteChar
+            'quote_char' => $quoteChar,
         ]);
 
         // Set the delimiter and enclosure character
@@ -448,21 +451,23 @@ class ImportController extends Controller
 
             // Clean the values
             if (is_array($line)) {
-                return array_map(function($value) {
+                return array_map(function ($value) {
                     // Remove null bytes and control characters
                     $value = str_replace("\0", '', $value);
                     $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
+
                     return trim($value);
                 }, $line);
             }
 
             // If we get here with a non-array, something went wrong
             Log::warning('CSV line is not an array', ['line' => $line]);
+
             return false;
         } catch (\Exception $e) {
             Log::error('Error reading CSV line', [
                 'error' => $e->getMessage(),
-                'file_position' => ftell($file)
+                'file_position' => ftell($file),
             ]);
 
             // Try to recover by reading the next line as a plain string
@@ -474,6 +479,7 @@ class ImportController extends Controller
                 $manualValues = str_getcsv($rawLine, $delimiter, $quoteChar);
                 if (is_array($manualValues) && count($manualValues) > 0) {
                     Log::debug('Recovered with manual parsing', ['values_count' => count($manualValues)]);
+
                     return array_map('trim', $manualValues);
                 }
             }
@@ -489,12 +495,12 @@ class ImportController extends Controller
     {
         Log::debug('Checking for duplicate transaction', [
             'account_id' => $accountId,
-            'data' => $data
+            'data' => $data,
         ]);
 
         // Get the booked date and create a date range for comparison
         $bookedDate = \DateTime::createFromFormat('Y-m-d H:i:s', $data['booked_date']);
-        if (!$bookedDate) {
+        if (! $bookedDate) {
             return false;
         }
 
@@ -510,15 +516,15 @@ class ImportController extends Controller
             ->whereBetween('booked_date', [$startDate, $endDate]);
 
         // Add description to the check if it exists
-        if (!empty($data['description'])) {
+        if (! empty($data['description'])) {
             $query->where('description', $data['description']);
         }
 
         // Add target/source IBAN to the check if they exist
-        if (!empty($data['target_iban'])) {
+        if (! empty($data['target_iban'])) {
             $query->where('target_iban', $data['target_iban']);
         }
-        if (!empty($data['source_iban'])) {
+        if (! empty($data['source_iban'])) {
             $query->where('source_iban', $data['source_iban']);
         }
 
@@ -549,18 +555,18 @@ class ImportController extends Controller
         $requiredFields = ['booked_date', 'amount', 'partner'];
         $missingRequiredFields = [];
         foreach ($requiredFields as $field) {
-            if (!isset($mapping[$field]) || $mapping[$field] === null) {
+            if (! isset($mapping[$field]) || $mapping[$field] === null) {
                 $missingRequiredFields[] = $field;
             }
         }
 
-        if (!empty($missingRequiredFields)) {
-            throw new \Exception('Missing required field mappings: ' . implode(', ', $missingRequiredFields));
+        if (! empty($missingRequiredFields)) {
+            throw new \Exception('Missing required field mappings: '.implode(', ', $missingRequiredFields));
         }
 
         // Map each column based on the configuration
         foreach ($mapping as $field => $columnIndex) {
-            if ($columnIndex === null || !isset($row[$columnIndex])) {
+            if ($columnIndex === null || ! isset($row[$columnIndex])) {
                 continue;
             }
 
@@ -604,14 +610,14 @@ class ImportController extends Controller
         }
 
         // Set required fields
-        $data['transaction_id'] = 'IMP-' . Str::random(10);
+        $data['transaction_id'] = 'IMP-'.Str::random(10);
         $data['currency'] = $currency;
         $data['account_id'] = $accountId;
         // Use type from mapping if provided, otherwise default to "Imported"
-        $data['type'] = $data['type'] ?? "Imported";
+        $data['type'] = $data['type'] ?? 'Imported';
         $data['metadata'] = [
             'import_id' => $import->id,
-            'imported_at' => now()->format('Y-m-d H:i:s')
+            'imported_at' => now()->format('Y-m-d H:i:s'),
         ];
         $data['balance_after_transaction'] = 0; // Placeholder, to be calculated later
         // Map CSV row values to their headers for key:value structure
@@ -624,19 +630,19 @@ class ImportController extends Controller
         $data['import_data'] = json_encode($importDataAssoc, JSON_UNESCAPED_UNICODE); // Save original CSV row as JSON key:value
 
         // Set default values for required fields that might be missing
-        if (!isset($data['processed_date'])) {
+        if (! isset($data['processed_date'])) {
             $data['processed_date'] = $data['booked_date'] ?? now()->format('Y-m-d H:i:s');
             Log::debug('Setting default processed_date', ['value' => $data['processed_date']]);
         }
 
         // If partner is empty (but mapped), set a default
-        if (!isset($data['partner']) || empty(trim($data['partner']))) {
+        if (! isset($data['partner']) || empty(trim($data['partner']))) {
             $data['partner'] = 'Unknown';
             Log::debug('Setting default partner', ['value' => $data['partner']]);
         }
 
         // If description is required but missing, set a default
-        if (!isset($data['description'])) {
+        if (! isset($data['description'])) {
             $data['description'] = 'Imported transaction';
             Log::debug('Setting default description', ['value' => $data['description']]);
         }
@@ -645,8 +651,9 @@ class ImportController extends Controller
         if ($this->isDuplicateTransaction($data, $accountId)) {
             Log::info('Skipping duplicate transaction', [
                 'account_id' => $accountId,
-                'data' => $data
+                'data' => $data,
             ]);
+
             return 'skipped';
         }
 
@@ -656,11 +663,12 @@ class ImportController extends Controller
         try {
             Transaction::create($data);
             Log::debug('Transaction created successfully');
+
             return 'processed';
         } catch (\Exception $e) {
             Log::error('Failed to create transaction', [
                 'error' => $e->getMessage(),
-                'data' => json_encode($data)
+                'data' => json_encode($data),
             ]);
             throw $e;
         }
@@ -673,7 +681,7 @@ class ImportController extends Controller
     {
         Log::debug('Processing import preview', [
             'import_id' => $import->id,
-            'preview_size' => $previewSize
+            'preview_size' => $previewSize,
         ]);
 
         $path = "imports/{$import->filename}";
@@ -694,7 +702,9 @@ class ImportController extends Controller
         // Read rows until we have enough valid ones or reach maximum attempts
         while ($validRows < $previewSize && $processedRows < $previewSize * 2) {
             $line = $this->safelyGetCSVLine($file, $delimiter, $quoteChar);
-            if (!$line) break;
+            if (! $line) {
+                break;
+            }
 
             $processedRows++;
             Log::debug('Processing preview row', ['row_number' => $processedRows, 'line' => $line]);
@@ -706,7 +716,7 @@ class ImportController extends Controller
 
                 // Map each column based on the configuration
                 foreach ($mapping as $field => $columnIndex) {
-                    if ($columnIndex === null || !isset($line[$columnIndex])) {
+                    if ($columnIndex === null || ! isset($line[$columnIndex])) {
                         continue;
                     }
 
@@ -746,7 +756,7 @@ class ImportController extends Controller
                 Log::error('Failed to process preview row', [
                     'row_number' => $processedRows,
                     'error' => $e->getMessage(),
-                    'line' => $line
+                    'line' => $line,
                 ]);
             }
         }
@@ -783,7 +793,7 @@ class ImportController extends Controller
                 // Try alternative formats
                 $alternativeFormats = [
                     'd.m.Y', 'Y-m-d', 'd/m/Y', 'm/d/Y', 'Y.m.d',
-                    'd.m.Y H:i:s', 'Y-m-d H:i:s'
+                    'd.m.Y H:i:s', 'Y-m-d H:i:s',
                 ];
 
                 foreach ($alternativeFormats as $altFormat) {
@@ -799,8 +809,9 @@ class ImportController extends Controller
                     Log::warning('Failed to parse date', [
                         'date_string' => $dateString,
                         'format' => $format,
-                        'errors' => \DateTime::getLastErrors()
+                        'errors' => \DateTime::getLastErrors(),
                     ]);
+
                     return null;
                 }
             }
@@ -810,8 +821,9 @@ class ImportController extends Controller
             Log::error('Error parsing date', [
                 'date_string' => $dateString,
                 'format' => $format,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -824,7 +836,7 @@ class ImportController extends Controller
         Log::debug('Parsing amount', [
             'amount_string' => $amountString,
             'format' => $format,
-            'strategy' => $strategy
+            'strategy' => $strategy,
         ]);
 
         // Clean the input string
@@ -871,8 +883,9 @@ class ImportController extends Controller
         } catch (\Exception $e) {
             Log::error('Error parsing amount', [
                 'amount_string' => $amountString,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -941,7 +954,7 @@ class ImportController extends Controller
         if ($mapping->user_id !== Auth::id()) {
             Log::warning('Unauthorized mapping access attempt', [
                 'mapping_id' => $mapping->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
             abort(403);
         }
@@ -966,7 +979,7 @@ class ImportController extends Controller
         if ($mapping->user_id !== Auth::id()) {
             Log::warning('Unauthorized mapping deletion attempt', [
                 'mapping_id' => $mapping->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
             abort(403);
         }

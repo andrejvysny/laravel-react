@@ -1,22 +1,21 @@
+import { Icon } from '@/components/ui/icon';
 import { Transaction as TransactionType } from '@/types/index';
 import { formatAmount, formatDate } from '@/utils/date';
 import { useState } from 'react';
-import TransactionDetails from './TransactionDetails';
 import { icons } from '../ui/icon-picker';
-import { Icon } from '@/components/ui/icon';
+import TransactionDetails from './TransactionDetails';
 
 export default function Transaction(transaction: TransactionType) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
         <div className="flex flex-col">
-            <div
-                className="mx-auto w-full max-w-xl  rounded-xl bg-card border-1 shadow-xs hover:border-current p-2 transition-colors"
-            >
-
-                <div className="flex items-center gap-4  w-full cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full p-3" style={{ backgroundColor: transaction.category?.color || '#333333' }}>
+            <div className="bg-card mx-auto w-full max-w-xl rounded-xl border-1 p-2 shadow-xs transition-colors hover:border-current">
+                <div className="flex w-full cursor-pointer items-center gap-4" onClick={() => setIsExpanded(!isExpanded)}>
+                    <div
+                        className="flex h-14 w-14 items-center justify-center rounded-full p-3"
+                        style={{ backgroundColor: transaction.category?.color || '#333333' }}
+                    >
                         {transaction.category?.icon ? (
                             <Icon iconNode={icons[transaction.category.icon || '']} className="h-8 w-8 text-white" />
                         ) : (
@@ -41,22 +40,29 @@ export default function Transaction(transaction: TransactionType) {
                         <small className="text-gray-500">{formatDate(transaction.processed_date)}</small>
                         <div className="mt-1 flex gap-2">
                             {transaction.account && (
-                                <span className="rounded-full bg-background border-1 border-black px-2 py-1 text-xs text-base">{transaction.account?.name}</span>
+                                <span className="bg-background rounded-full border-1 border-black px-2 py-1 text-base text-xs">
+                                    {transaction.account?.name}
+                                </span>
                             )}
 
-                            <span className="rounded-full bg-background border-1 border-black px-2 py-1 text-xs text-base">{transaction.type}</span>
-                            
+                            <span className="bg-background rounded-full border-1 border-black px-2 py-1 text-base text-xs">{transaction.type}</span>
+
                             {transaction.category && (
-                                <span className="rounded-full bg-background border-1 px-2 py-1 text-xs text-base" style={{ borderColor: transaction.category?.color || '#333333', color: transaction.category?.color || '#333333' }}>{transaction.category.name}</span>
+                                <span
+                                    className="bg-background rounded-full border-1 px-2 py-1 text-base text-xs"
+                                    style={{ borderColor: transaction.category?.color || '#333333', color: transaction.category?.color || '#333333' }}
+                                >
+                                    {transaction.category.name}
+                                </span>
                             )}
                         </div>
                     </div>
                     {transaction.amount < 0 ? (
-                        <div className="text-lg text-destructive-foreground font-semibold">
+                        <div className="text-destructive-foreground text-lg font-semibold">
                             ▼ {formatAmount(transaction.amount)} {transaction.currency}
                         </div>
                     ) : (
-                        <div className="text-lg text-green-500 font-semibold">
+                        <div className="text-lg font-semibold text-green-500">
                             ▲ {formatAmount(transaction.amount)} {transaction.currency}
                         </div>
                     )}

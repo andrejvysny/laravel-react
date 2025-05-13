@@ -52,4 +52,4 @@ class TagController extends Controller
 
         return redirect()->back()->with('success', 'Tag deleted successfully');
     }
-} 
+}

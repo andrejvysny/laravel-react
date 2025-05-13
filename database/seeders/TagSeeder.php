@@ -55,4 +55,4 @@ class TagSeeder extends Seeder
             ]);
         }
     }
-} 
+}

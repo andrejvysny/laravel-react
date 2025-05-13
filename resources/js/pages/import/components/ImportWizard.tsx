@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Import, Transaction } from '@/types/index';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import UploadStep from './wizard-steps/UploadStep';
-import ConfigureStep from './wizard-steps/ConfigureStep';
 import CleanStep from './wizard-steps/CleanStep';
-import MapStep from './wizard-steps/MapStep';
+import ConfigureStep from './wizard-steps/ConfigureStep';
 import ConfirmStep from './wizard-steps/ConfirmStep';
+import MapStep from './wizard-steps/MapStep';
+import UploadStep from './wizard-steps/UploadStep';
 
 interface ImportWizardProps {
     onComplete: (importData: Import) => void;
@@ -43,11 +43,12 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
     // Load categories for mapping step
     useEffect(() => {
         if (currentStep === 'map') {
-            axios.get('/imports/categories')
-                .then(response => {
+            axios
+                .get('/imports/categories')
+                .then((response) => {
                     setCategories(response.data.categories);
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error('Failed to load categories', error);
                     setError('Failed to load categories');
                 });
@@ -58,35 +59,35 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
         setCurrentStep(step);
     };
 
-    const handleUploadComplete = useCallback((data: {
-        importId: number;
-        headers: string[];
-        sampleRows: string[][];
-        accountId: number;
-        totalRows: number;
-    }) => {
-        setUploadedData(data);
-        setCurrentStep('configure');
-    }, []);
+    const handleUploadComplete = useCallback(
+        (data: { importId: number; headers: string[]; sampleRows: string[][]; accountId: number; totalRows: number }) => {
+            setUploadedData(data);
+            setCurrentStep('configure');
+        },
+        [],
+    );
 
-    const handleConfigureComplete = useCallback((data: {
-        columnMapping: Record<string, number | null>;
-        dateFormat: string;
-        amountFormat: string;
-        amountTypeStrategy: string;
-        currency: string;
-        previewData: Partial<Transaction>[];
-    }) => {
-        setConfiguredData({
-            columnMapping: data.columnMapping,
-            dateFormat: data.dateFormat,
-            amountFormat: data.amountFormat,
-            amountTypeStrategy: data.amountTypeStrategy,
-            currency: data.currency,
-        });
-        setPreviewData(data.previewData);
-        setCurrentStep('clean');
-    }, []);
+    const handleConfigureComplete = useCallback(
+        (data: {
+            columnMapping: Record<string, number | null>;
+            dateFormat: string;
+            amountFormat: string;
+            amountTypeStrategy: string;
+            currency: string;
+            previewData: Partial<Transaction>[];
+        }) => {
+            setConfiguredData({
+                columnMapping: data.columnMapping,
+                dateFormat: data.dateFormat,
+                amountFormat: data.amountFormat,
+                amountTypeStrategy: data.amountTypeStrategy,
+                currency: data.currency,
+            });
+            setPreviewData(data.previewData);
+            setCurrentStep('clean');
+        },
+        [],
+    );
 
     const handleCleanComplete = useCallback((cleanedData: Partial<Transaction>[]) => {
         setPreviewData(cleanedData);
@@ -133,20 +134,9 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
                     />
                 ) : null;
             case 'clean':
-                return configuredData ? (
-                    <CleanStep
-                        data={previewData}
-                        onComplete={handleCleanComplete}
-                    />
-                ) : null;
+                return configuredData ? <CleanStep data={previewData} onComplete={handleCleanComplete} /> : null;
             case 'map':
-                return (
-                    <MapStep
-                        data={previewData}
-                        categories={categories}
-                        onComplete={handleMapComplete}
-                    />
-                );
+                return <MapStep data={previewData} categories={categories} onComplete={handleMapComplete} />;
             case 'confirm':
                 return (
                     <ConfirmStep
@@ -165,7 +155,7 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background text-white overflow-hidden">
+        <div className="bg-background fixed inset-0 z-50 flex flex-col overflow-hidden text-white">
             {/* Header */}
             <div className="absolute top-0 right-0 p-5">
                 <Button variant="ghost" onClick={onCancel}>
@@ -175,17 +165,12 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
 
             {/* Steps Indicator */}
             <div className="px-8 py-4">
-                <div className="flex items-center justify-between max-w-3xl mx-auto">
+                <div className="mx-auto flex max-w-3xl items-center justify-between">
                     <StepIndicator
                         number={1}
                         title="Upload"
                         isActive={currentStep === 'upload'}
-                        isCompleted={
-                            currentStep === 'configure' ||
-                            currentStep === 'clean' ||
-                            currentStep === 'map' ||
-                            currentStep === 'confirm'
-                        }
+                        isCompleted={currentStep === 'configure' || currentStep === 'clean' || currentStep === 'map' || currentStep === 'confirm'}
                         onClick={() => uploadedData && setCurrentStep('upload')}
                     />
                     <StepDivider isActive={currentStep !== 'upload'} />
@@ -193,11 +178,7 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
                         number={2}
                         title="Configure"
                         isActive={currentStep === 'configure'}
-                        isCompleted={
-                            currentStep === 'clean' ||
-                            currentStep === 'map' ||
-                            currentStep === 'confirm'
-                        }
+                        isCompleted={currentStep === 'clean' || currentStep === 'map' || currentStep === 'confirm'}
                         onClick={() => configuredData && setCurrentStep('configure')}
                     />
                     <StepDivider isActive={currentStep !== 'upload' && currentStep !== 'configure'} />
@@ -228,9 +209,7 @@ export default function ImportWizard({ onComplete, onCancel }: ImportWizardProps
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto p-6">
-                {renderStepContent()}
-            </div>
+            <div className="flex-1 overflow-auto p-6">{renderStepContent()}</div>
         </div>
     );
 }
@@ -247,15 +226,13 @@ function StepIndicator({ number, title, isActive, isCompleted, onClick }: StepIn
     const bgColor = isActive
         ? 'bg-foreground text-current font-semibold'
         : isCompleted
-            ? 'bg-green-500 text-current font-semibold'
-            : ' text-foreground border font-semibold border-foreground';
+          ? 'bg-green-500 text-current font-semibold'
+          : ' text-foreground border font-semibold border-foreground';
 
     return (
-        <div className="flex flex-col items-center cursor-pointer" onClick={onClick}>
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bgColor}`}>
-                {isCompleted ? '✓' : number}
-            </div>
-            <div className="mt-2 text-sm text-foreground">{title}</div>
+        <div className="flex cursor-pointer flex-col items-center" onClick={onClick}>
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${bgColor}`}>{isCompleted ? '✓' : number}</div>
+            <div className="text-foreground mt-2 text-sm">{title}</div>
         </div>
     );
 }

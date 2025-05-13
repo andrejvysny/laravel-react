@@ -10,7 +10,7 @@ class Import extends Model
 {
     /** @use HasFactory<\Database\Factories\ImportFactory> */
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -31,7 +31,7 @@ class Import extends Model
         'currency',
         'metadata',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -42,16 +42,20 @@ class Import extends Model
         'metadata' => 'array',
         'processed_at' => 'datetime',
     ];
-    
+
     /**
      * Status constants
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PROCESSING = 'processing';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_COMPLETED_SKIPPED_DUPLICATES = 'completed_skipped_duplicates';
-    
+
     /**
      * Get the user that owns the import.
      */

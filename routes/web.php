@@ -11,7 +11,6 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\Transactions\TransactionController;
 use App\Http\Controllers\Transactions\TransactionRuleController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
 
@@ -41,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/transaction-rules/{rule}', [TransactionRuleController::class, 'update'])->name('transaction-rules.update');
     Route::delete('/transaction-rules/{rule}', [TransactionRuleController::class, 'destroy'])->name('transaction-rules.destroy');
     Route::post('/transaction-rules/reorder', [TransactionRuleController::class, 'reorder'])->name('transaction-rules.reorder');
-    
+
     // Import Routes
     Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
     Route::post('/imports/upload', [ImportController::class, 'upload'])->name('imports.upload');
@@ -53,24 +52,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/imports/mappings/{mapping}', [ImportController::class, 'updateMappingUsage'])->name('imports.mappings.usage');
     Route::delete('/imports/mappings/{mapping}', [ImportController::class, 'deleteMapping'])->name('imports.mappings.delete');
 
+    // Category routes
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
- // Category routes
- Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
- Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
- Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
- Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    // Merchant routes
+    Route::get('/merchants', [MerchantController::class, 'index'])->name('merchants.index');
+    Route::post('/merchants', [MerchantController::class, 'store'])->name('merchants.store');
+    Route::put('/merchants/{merchant}', [MerchantController::class, 'update'])->name('merchants.update');
+    Route::delete('/merchants/{merchant}', [MerchantController::class, 'destroy'])->name('merchants.destroy');
 
- // Merchant routes
- Route::get('/merchants', [MerchantController::class, 'index'])->name('merchants.index');
- Route::post('/merchants', [MerchantController::class, 'store'])->name('merchants.store');
- Route::put('/merchants/{merchant}', [MerchantController::class, 'update'])->name('merchants.update');
- Route::delete('/merchants/{merchant}', [MerchantController::class, 'destroy'])->name('merchants.destroy');
-
- // Tag routes
- Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
- Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
- Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
- Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+    // Tag routes
+    Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
+    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
+    Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
+    Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 
 });
 

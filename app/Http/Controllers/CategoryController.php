@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoryController extends Controller
 {
@@ -20,6 +20,7 @@ class CategoryController extends Controller
             ->get();
         $categories = $categories->map(function ($category) {
             $category->parent_category_id = $category->parentCategory ? $category->parentCategory->id : null;
+
             return $category;
         });
 
@@ -41,7 +42,7 @@ class CategoryController extends Controller
         $data = $validated;
         if ($data['parent_category_id'] === '0') {
             $data['parent_category_id'] = null;
-        } else if ($data['parent_category_id'] !== null) {
+        } elseif ($data['parent_category_id'] !== null) {
             $data['parent_category_id'] = (int) $data['parent_category_id'];
         }
 
@@ -65,7 +66,7 @@ class CategoryController extends Controller
         $data = $validated;
         if ($data['parent_category_id'] === '0') {
             $data['parent_category_id'] = null;
-        } else if ($data['parent_category_id'] !== null) {
+        } elseif ($data['parent_category_id'] !== null) {
             $data['parent_category_id'] = (int) $data['parent_category_id'];
         }
 
@@ -74,7 +75,7 @@ class CategoryController extends Controller
             $request->validate([
                 'parent_category_id' => [
                     'exists:categories,id',
-                    Rule::notIn([$category->id]) // Prevent setting itself as parent
+                    Rule::notIn([$category->id]), // Prevent setting itself as parent
                 ],
             ]);
         }

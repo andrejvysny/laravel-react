@@ -1,14 +1,22 @@
-import { Currency } from '@/types/index';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { SmartForm, InferFormValues } from '@/components/ui/smart-form';
-import { TextInput, SelectInput } from '@/components/ui/form-inputs';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { SelectInput, TextInput } from '@/components/ui/form-inputs';
+import { InferFormValues, SmartForm } from '@/components/ui/smart-form';
+import { Currency } from '@/types/index';
 import { z } from 'zod';
 
 interface CreateAccountModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: { name: string; account_id: string; bank_name: string; iban: string; currency: Currency; balance: number; type: string }) => void;
+    onSubmit: (data: {
+        name: string;
+        account_id: string;
+        bank_name: string;
+        iban: string;
+        currency: Currency;
+        balance: number;
+        type: string;
+    }) => void;
 }
 
 const formSchema = z.object({
@@ -44,29 +52,14 @@ export default function CreateAccountModal({ isOpen, onClose, onSubmit }: Create
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create New Account</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details to create a new account.
-                    </DialogDescription>
+                    <DialogDescription>Fill in the details to create a new account.</DialogDescription>
                 </DialogHeader>
-                <SmartForm
-                    schema={formSchema}
-                    defaultValues={defaultValues}
-                    onSubmit={handleSubmit}
-                    formProps={{ className: 'space-y-4' }}
-                >
+                <SmartForm schema={formSchema} defaultValues={defaultValues} onSubmit={handleSubmit} formProps={{ className: 'space-y-4' }}>
                     {() => (
                         <>
-                            <TextInput<FormValues>
-                                name="name"
-                                label="Account Name"
-                                required
-                            />
+                            <TextInput<FormValues> name="name" label="Account Name" required />
 
-                            <TextInput<FormValues>
-                                name="account_id"
-                                label="Account ID"
-                                required
-                            />
+                            <TextInput<FormValues> name="account_id" label="Account ID" required />
 
                             <SelectInput<FormValues>
                                 name="type"
@@ -77,33 +70,20 @@ export default function CreateAccountModal({ isOpen, onClose, onSubmit }: Create
                                 ]}
                             />
 
-                            <TextInput<FormValues>
-                                name="bank_name"
-                                label="Bank Name"
-                                required
-                            />
+                            <TextInput<FormValues> name="bank_name" label="Bank Name" required />
 
-                            <TextInput<FormValues>
-                                name="iban"
-                                label="IBAN"
-                                required
-                            />
+                            <TextInput<FormValues> name="iban" label="IBAN" required />
 
                             <SelectInput<FormValues>
                                 name="currency"
                                 label="Currency"
-                                options={Object.values(Currency).map(currency => ({
+                                options={Object.values(Currency).map((currency) => ({
                                     value: currency,
                                     label: currency,
                                 }))}
                             />
 
-                            <TextInput<FormValues>
-                                name="balance"
-                                label="Initial Balance"
-                                type="number"
-                                required
-                            />
+                            <TextInput<FormValues> name="balance" label="Initial Balance" type="number" required />
 
                             <DialogFooter>
                                 <Button type="submit">Create Account</Button>

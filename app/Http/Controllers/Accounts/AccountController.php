@@ -13,11 +13,9 @@ class AccountController extends Controller
     {
         $accounts = Account::where('user_id', auth()->id())->get();
 
-
-        
         if (request()->wantsJson()) {
             return response()->json([
-                'accounts' => $accounts
+                'accounts' => $accounts,
             ]);
         }
 
@@ -25,8 +23,6 @@ class AccountController extends Controller
             'accounts' => $accounts,
         ]);
     }
-
-
 
     public function store(Request $request)
     {
@@ -108,17 +104,17 @@ class AccountController extends Controller
 
     public function destroy($id)
     {
-     
-            $account = Account::where('user_id', auth()->id())->findOrFail($id);
-            
-            // Delete all associated transactions first
-            $account->transactions()->delete();
-            
-            // Delete the account
-            $account->delete();
 
-            return redirect()->route('accounts.index')
-                ->with('success', 'Account and all associated transactions have been deleted successfully');
-    
+        $account = Account::where('user_id', auth()->id())->findOrFail($id);
+
+        // Delete all associated transactions first
+        $account->transactions()->delete();
+
+        // Delete the account
+        $account->delete();
+
+        return redirect()->route('accounts.index')
+            ->with('success', 'Account and all associated transactions have been deleted successfully');
+
     }
 }

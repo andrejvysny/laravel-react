@@ -1,12 +1,11 @@
 import CreateAccountModal from '@/components/accounts/CreateAccountModal';
 import GoCardlessImportWizard from '@/components/accounts/GoCardlessImportWizard';
+import ValueSplit from '@/components/ui/value-split';
 import AppLayout from '@/layouts/app-layout';
+import PageHeader from '@/layouts/page-header';
 import { Account } from '@/types/index';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import PageHeader from '@/layouts/page-header';
-import ValueSplit from '@/components/ui/value-split';
 
 interface Props {
     accounts: Account[];
@@ -31,18 +30,21 @@ export default function Index({ accounts }: Props) {
                 <div className="mx-auto w-full max-w-7xl">
                     <PageHeader
                         title="Accounts"
-                        buttons={[{
+                        buttons={[
+                            {
                                 onClick: () => setIsCreateModalOpen(true),
                                 label: '+ New Account',
-                            },{
+                            },
+                            {
                                 onClick: () => setIsImportWizardOpen(true),
                                 label: 'Import Account',
                             },
                         ]}
                     />
-                    </div></div>
-<div className="mx-auto w-full max-w-7xl p-4">
-<div className="mx-auto w-full max-w-7xl">
+                </div>
+            </div>
+            <div className="mx-auto w-full max-w-7xl p-4">
+                <div className="mx-auto w-full max-w-7xl">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {accounts.map((account) => (
                             <Link
@@ -58,13 +60,12 @@ export default function Index({ accounts }: Props) {
                                     <span className="text-sm">{account.currency}</span>
                                 </div>
 
-                                <ValueSplit data={
-                                    [
+                                <ValueSplit
+                                    data={[
                                         { label: 'IBAN', value: account.iban },
                                         { label: 'Balance', value: Number(account.balance).toFixed(2) },
-                                    ]
-                                } />
-
+                                    ]}
+                                />
                             </Link>
                         ))}
                     </div>
