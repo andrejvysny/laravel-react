@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             AccountSeeder::class,
+            CategorySeeder::class,
+            MerchantSeeder::class,
+            TagSeeder::class,
             TransactionSeeder::class,
-            TransactionRuleSeeder::class,
         ]);
     }
 }

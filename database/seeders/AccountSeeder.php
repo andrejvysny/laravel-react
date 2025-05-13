@@ -10,50 +10,58 @@ class AccountSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
+        $user = User::where('email', 'demo@example.com')->first();
 
-        foreach ($users as $user) {
-            // Create a checking account
-            Account::create([
-                'user_id' => $user->id,
-                'name' => 'Main Checking Account',
-                'bank_name' => 'Deutsche Bank',
+        $accounts = [
+            [
+                'name' => 'Main Checking',
+                'bank_name' => 'Demo Bank',
                 'iban' => 'DE89370400440532013000',
                 'type' => 'checking',
-                'currency' => 'EUR',
+                'currency' => 'USD',
                 'balance' => 5000.00,
-                'is_gocardless_synced' => true,
-                'gocardless_account_id' => 'ACC_'.strtoupper(substr(md5(rand()), 0, 8)),
-                'gocardless_last_synced_at' => now(),
-            ]);
-
-            // Create a savings account
-            Account::create([
-                'user_id' => $user->id,
-                'name' => 'Savings Account',
-                'bank_name' => 'N26',
+                'is_gocardless_synced' => false,
+            ],
+            [
+                'name' => 'Savings',
+                'bank_name' => 'Demo Bank',
                 'iban' => 'DE89370400440532013001',
                 'type' => 'savings',
-                'currency' => 'EUR',
-                'balance' => 10000.00,
+                'currency' => 'USD',
+                'balance' => 15000.00,
                 'is_gocardless_synced' => false,
-                'gocardless_account_id' => null,
-                'gocardless_last_synced_at' => null,
-            ]);
-
-            // Create a credit card account
-            Account::create([
-                'user_id' => $user->id,
+            ],
+            [
                 'name' => 'Credit Card',
-                'bank_name' => 'Barclays',
-                'iban' => 'GB29NWBK60161331926819',
+                'bank_name' => 'Demo Bank',
+                'iban' => 'DE89370400440532013002',
                 'type' => 'credit',
-                'currency' => 'GBP',
-                'balance' => -500.00,
-                'is_gocardless_synced' => true,
-                'gocardless_account_id' => 'ACC_'.strtoupper(substr(md5(rand()), 0, 8)),
-                'gocardless_last_synced_at' => now()->subDays(2),
+                'currency' => 'USD',
+                'balance' => -2500.00,
+                'is_gocardless_synced' => false,
+            ],
+            [
+                'name' => 'Investment',
+                'bank_name' => 'Demo Bank',
+                'iban' => 'DE89370400440532013003',
+                'type' => 'investment',
+                'currency' => 'USD',
+                'balance' => 25000.00,
+                'is_gocardless_synced' => false,
+            ],
+        ];
+
+        foreach ($accounts as $account) {
+            Account::create([
+                'name' => $account['name'],
+                'bank_name' => $account['bank_name'],
+                'iban' => $account['iban'],
+                'type' => $account['type'],
+                'currency' => $account['currency'],
+                'balance' => $account['balance'],
+                'is_gocardless_synced' => $account['is_gocardless_synced'],
+                'user_id' => $user->id,
             ]);
         }
     }
-}
+} 

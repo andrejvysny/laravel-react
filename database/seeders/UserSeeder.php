@@ -42,7 +42,11 @@ class UserSeeder extends Seeder
             'gocardless_country' => 'DE',
         ]);
 
-        // Create additional test users
-        User::factory(5)->create();
+        User::create([
+            'name' => 'Demo User',
+            'email' => 'demo@example.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
     }
 }
