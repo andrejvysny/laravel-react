@@ -6,8 +6,10 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { SmartForm, InferFormValues } from '@/components/ui/smart-form';
 import { TextInput, TextareaInput, ColorInput, SelectInput } from '@/components/ui/form-inputs';
+import { IconPicker, icons } from '@/components/ui/icon-picker';
 import { DataTable } from '@/components/DataTable';
 import PageHeader from '@/layouts/page-header';
+import { Icon } from '@/components/ui/icon';
 
 interface Category {
   id: number;
@@ -28,7 +30,7 @@ const formSchema = z.object({
   description: z.string().nullable(),
   color: z.string().nullable(),
   icon: z.string().nullable(),
-  parent_category_id: z.number().nullable(),
+  parent_category_id: z.string(),
 });
 
 type FormValues = InferFormValues<typeof formSchema>;
@@ -36,36 +38,48 @@ type FormValues = InferFormValues<typeof formSchema>;
 export default function Categories({ categories }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [icon, setIcon] = useState<string | null>(null);
 
   const defaultValues: FormValues = {
     name: '',
     description: '',
     color: '#6366F1',
-    icon: '',
-    parent_category_id: null,
+    icon: 'ShoppingBag',
+    parent_category_id: '0',
   };
 
   const openCreateModal = () => {
     setEditingCategory(null);
+    setIcon(null);
     setIsOpen(true);
   };
 
   const openEditModal = (category: Category) => {
     setEditingCategory(category);
+    setIcon(category.icon);
     setIsOpen(true);
   };
 
   const onSubmit = (values: FormValues) => {
+    const formData = {
+      ...values,
+      icon: icon || values.icon,
+      parent_category_id: values.parent_category_id === '0' ? null : values.parent_category_id
+    };
+
     if (editingCategory) {
-      router.put(`/categories/${editingCategory.id}`, values, {
+      router.put(`/categories/${editingCategory.id}`, formData, {
         onSuccess: () => {
           setIsOpen(false);
+          setEditingCategory(null);
+          setIcon(null);
         },
       });
     } else {
-      router.post('/categories', values, {
+      router.post('/categories', formData, {
         onSuccess: () => {
           setIsOpen(false);
+          setIcon(null);
         },
       });
     }
@@ -85,7 +99,8 @@ export default function Categories({ categories }: Props) {
       label: category.name,
     }));
 
-  // Add "None" option with a non-empty value
+  console.log(categories)
+  // Add "None" option with a special value
   parentCategoryOptions.unshift({ value: "0", label: "None" });
 
   return (
@@ -105,12 +120,16 @@ export default function Categories({ categories }: Props) {
           <DataTable
               columns={
                   [
+                    {header: '', key: 'color', render: (row) => (
+                      <div className="m-auto flex h-12 w-12 items-center justify-center rounded-full p-2" style={{ backgroundColor: row.color || '#6366F1' }}>
+                        <Icon iconNode={icons[row.icon || '']} className="h-8 w-8 text-white"/>
+                      </div>
+                  )},
                       {header: 'Name', key: 'name'},
                         {header: 'Description', key: 'description'},
-                        {header: 'Color', key: 'color', render: (row) => (
-                            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: row.color }} />
+                        {header: 'Parent Category', key: 'parent_category', render: (row) => (
+                            <span>{row.parent_category?.name || 'None'}</span>
                         )},
-                        {header: 'Parent Category', key: 'parentCategory', render: (row) => row.parentCategory?.name || ''},
                         {header: 'Actions', key: 'actions', className: 'text-right', render: (row) => (
                             <div className="flex justify-end">
                                 <Button variant="outline" size="sm" className="mr-2" onClick={() => openEditModal(row)}>
@@ -129,11 +148,6 @@ export default function Categories({ categories }: Props) {
               }
           />
 
-
-
-
-
-
               <Dialog open={isOpen} onOpenChange={setIsOpen}>
                   <DialogContent>
                       <DialogHeader>
@@ -148,11 +162,13 @@ export default function Categories({ categories }: Props) {
                               name: editingCategory.name,
                               description: editingCategory.description || '',
                               color: editingCategory.color || '#6366F1',
-                              icon: editingCategory.icon || '',
-                              parent_category_id: editingCategory.parent_category_id,
+                              icon: editingCategory.icon || 'ShoppingBag',
+                              parent_category_id: editingCategory.parent_category_id ? editingCategory.parent_category_id.toString() : '0',
                           } : defaultValues}
                           onSubmit={onSubmit}
-                          formProps={{ className: 'space-y-4' }}
+                          formProps={{
+                              className: 'space-y-4'
+                          }}
                       >
                           {() => (
                               <>
@@ -172,10 +188,20 @@ export default function Categories({ categories }: Props) {
                                       label="Color"
                                   />
 
-                                  <TextInput<FormValues>
-                                      name="icon"
-                                      label="Icon"
-                                  />
+                                  <div className="space-y-2">
+                                      <label className="text-sm font-medium">Icon</label>
+                                      <div onMouseDown={(e) => e.preventDefault()}>
+                                          <IconPicker
+                                              value={icon || 'ShoppingBag'}
+                                              onChange={(value) => {
+                                                  setIcon(value);
+                                                  if (editingCategory) {
+                                                      setEditingCategory({ ...editingCategory, icon: value });
+                                                  }
+                                              }}
+                                          />
+                                      </div>
+                                  </div>
 
                                   <SelectInput<FormValues>
                                       name="parent_category_id"

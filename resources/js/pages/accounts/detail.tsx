@@ -24,9 +24,10 @@ interface Props {
     account: Account;
     transactions: Transaction[];
     monthlySummaries: Record<string, { income: number; expense: number; balance: number }>;
+    total_transactions: number;
 }
 
-export default function Detail({ account, transactions, monthlySummaries }: Props) {
+export default function Detail({ account, transactions, monthlySummaries, total_transactions }: Props) {
     const [syncing, setSyncing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const breadcrumbs = [
@@ -112,6 +113,7 @@ export default function Detail({ account, transactions, monthlySummaries }: Prop
                                         { label: 'Type', value: account.type },
                                         { label: 'Currency', value: account.currency },
                                         { label: 'Balance', value: Number(account.balance).toFixed(2) },
+                                        { label: 'Number of transactions', value: total_transactions },
                                     ]}
                                 />
 

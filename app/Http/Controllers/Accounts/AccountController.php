@@ -76,7 +76,8 @@ class AccountController extends Controller
         }
 
         // Get the transactions for this account
-        $transactions = $account->transactions()->get();
+        $transactions = $account->transactions()->with('category')->get();
+        $total_transactions = $transactions->count();
 
         // Calculate monthly summaries
         $monthlySummaries = [];
@@ -101,6 +102,7 @@ class AccountController extends Controller
             'account' => $account,
             'transactions' => $transactions,
             'monthlySummaries' => $monthlySummaries,
+            'total_transactions' => $total_transactions,
         ]);
     }
 

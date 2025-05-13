@@ -38,6 +38,7 @@ export interface Transaction {
     balance_after_transaction: number;
     account_id: number;
     account?: Account;
+    category?: Category;
     created_at: string;
     updated_at: string;
 }
@@ -95,6 +96,8 @@ export interface Category {
     id: number;
     name: string;
     user_id: number;
+    color?: string;
+    icon?: string;
     created_at: string;
     updated_at: string;
 }

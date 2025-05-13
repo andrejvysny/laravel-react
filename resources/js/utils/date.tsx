@@ -7,3 +7,15 @@ export const formatDate = (dateString: string) => {
         minute: '2-digit',
     });
 };
+
+export const formatDateShort = (dateString: string) => {
+    return new Date(dateString).toLocaleString('sk-SK', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
+
+export const formatAmount = (amount: number) => {
+    return amount;
+};
