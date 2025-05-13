@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounts\AccountController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\BankProviders\GoCardlessController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -23,6 +24,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

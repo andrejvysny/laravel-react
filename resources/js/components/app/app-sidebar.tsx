@@ -15,6 +15,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Analytics',
+        href: '/analytics',
+        icon: PieChartIcon,
+    },
+    {
         title: 'Accounts',
         href: '/accounts',
         icon: Users,
@@ -49,11 +54,7 @@ const mainNavItems: NavItem[] = [
         href: '/imports',
         icon: ArrowDownTrayIcon,
     },
-    {
-        title: 'Analytics',
-        href: '/analytics',
-        icon: PieChartIcon,
-    },
+
 ];
 
 const footerNavItems: NavItem[] = [

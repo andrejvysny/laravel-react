@@ -75,7 +75,12 @@ export default function Index({ transactions, monthlySummaries }: Props) {
     ];
 
     const handleCreateTransaction = (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'account'>) => {
-        router.post('/transactions', transaction, {
+        const payload = {
+            ...transaction,
+            category_id: transaction.category?.id,
+            category: undefined
+        };
+        router.post('/transactions', payload, {
             onSuccess: () => {
                 setIsCreateModalOpen(false);
             },
