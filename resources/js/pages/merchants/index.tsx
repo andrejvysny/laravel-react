@@ -86,11 +86,12 @@ export default function Merchants({ merchants }: Props) {
 
       <DataTable
         columns={[
+            { header: 'Logo', key: 'logo',className: "p-0", render: (row) => (
+                    row.logo ? <img src={row.logo} alt={row.name} className="w-full max-w-20 object-contain" /> : null
+                )},
           { header: 'Name', key: 'name' },
           { header: 'Description', key: 'description' },
-          { header: 'Logo', key: 'logo', render: (row) => (
-            row.logo ? <img src={row.logo} alt={row.name} className="w-8 h-8 object-contain" /> : null
-          )},
+
           { header: 'Actions', key: 'actions', className: 'text-right', render: (row) => (
             <div className="flex justify-end">
               <Button variant="outline" size="sm" className="mr-2" onClick={() => openEditModal(row)}>
@@ -152,4 +153,4 @@ export default function Merchants({ merchants }: Props) {
       </Dialog>
     </AppLayout>
   );
-} 
+}
