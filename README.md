@@ -44,43 +44,14 @@ Spendly is an open-source personal finance tracker that helps you manage your fi
 - **Testing**: PHPUnit, Jest
 
 ## 🐳 Quick Start
+1. Make sure you have Docker installed on your system.
 
-1. Clone the repository:
+2. Run the application:
+
 ```bash
-git clone https://github.com/yourusername/spendly.git
-cd spendly
-```
-
-2. Copy the environment file:
-```bash
-cp .env.example .env
-```
-
-3. Configure your environment variables in `.env`:
-```
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=spendly
-DB_USERNAME=root
-DB_PASSWORD=secret
-
-GOCARDLESS_ACCESS_TOKEN=your_access_token
-GOCARDLESS_ENVIRONMENT=sandbox
-```
+docker run -p 80:80 ghcr.io/andrejvysny/spendly:pre-release
 
 
-
-4. Start the application:
-```bash
-docker compose up -d
-```
-
-
-The application will be available at:
-- http://localhost:80
-
-For detailed development setup and contribution guidelines, please see [Development Guide](docs/Development.md).
 
 ## 📄 License
 
